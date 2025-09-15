@@ -29,6 +29,18 @@ def get_meeting_details(meeting_id):
         print(f"Error parsing JSON: {e}")
         return {}
 
+def extract_meeting(transcript):
+    try:
+        response = requests.post(f"{BASE_URL}/meeting/extract", json={"transcript": transcript})
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        print(f"Error extracting meeting: {e}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON: {e}")
+        return None
+
 # -------------------- Clips --------------------
 def get_clips():
     resp = requests.get(f"{BASE_URL}/clip")
@@ -42,6 +54,18 @@ def get_clip_details(clip_id: int):
         return resp.json()
     return {}
 
+def extract_clip(text):
+    try:
+        response = requests.post(f"{BASE_URL}/clip/extract", json={"text": text})
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        print(f"Error extracting clip: {e}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON: {e}")
+        return None
+
 # -------------------- Journals --------------------
 def get_journals():
     resp = requests.get(f"{BASE_URL}/journal")
@@ -54,6 +78,18 @@ def get_journal_details(journal_id: int):
     if resp.status_code == 200:
         return resp.json()
     return {}
+
+def extract_journal(text):
+    try:
+        response = requests.post(f"{BASE_URL}/journal/extract", json={"text": text})
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        print(f"Error extracting journal: {e}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON: {e}")
+        return None
 
 # -------------------- Action Items --------------------
 def get_action_items():

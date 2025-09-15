@@ -1,9 +1,33 @@
 import streamlit as st
-from utils.api_client import get_meetings, get_meeting_details
+from utils.api_client import get_meetings, get_meeting_details, extract_meeting
 
 st.set_page_config(page_title="Meetings", layout="wide")
 
 st.title("📅 Meetings")
+
+# Add new meeting section
+st.header("➕ Add New Meeting")
+with st.expander("Add Meeting Transcript", expanded=False):
+    transcript_text = st.text_area(
+        "Enter meeting transcript:",
+        placeholder="Paste your meeting transcript here...",
+        height=200,
+        key="meeting_transcript"
+    )
+    
+    if st.button("Extract Meeting Data", key="extract_meeting"):
+        if transcript_text.strip():
+            with st.spinner("Processing meeting transcript..."):
+                result = extract_meeting(transcript_text)
+                if result:
+                    st.success(f"✅ Meeting extracted successfully! Meeting ID: {result.get('id', 'N/A')}")
+                    st.rerun()  # Refresh the page to show the new meeting
+                else:
+                    st.error("❌ Failed to extract meeting data. Please try again.")
+        else:
+            st.warning("Please enter a meeting transcript.")
+
+st.divider()
 
 # ---- Fetch meetings ----
 meetings = get_meetings()
