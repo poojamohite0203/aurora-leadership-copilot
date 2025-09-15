@@ -6,10 +6,24 @@ def render_sidebar():
     # Custom CSS for sidebar styling
     st.markdown("""
     <style>
-    /* Sidebar styling */
-    .sidebar .sidebar-content {
-        background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 100%);
-        color: white;
+    /* Hide default Streamlit page navigation (the radio buttons at top) */
+    div[data-testid="stSidebarNav"] {
+        display: none !important;
+    }
+    
+    /* Hide any radio button navigation */
+    section[data-testid="stSidebar"] div[data-testid="stRadio"] {
+        display: none !important;
+    }
+    
+    /* Streamlit sidebar background override */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 100%) !important;
+    }
+    
+    section[data-testid="stSidebar"] > div {
+        background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 100%) !important;
+        color: white !important;
     }
     
     /* Custom sidebar title */
@@ -23,46 +37,46 @@ def render_sidebar():
         margin-bottom: 1.5rem;
         border-bottom: 2px solid rgba(255,255,255,0.2);
         background: rgba(0,0,0,0.1);
-    }
-    
-    /* Navigation items styling */
-    .nav-item {
-        padding: 0.7rem 1rem;
-        margin: 0.3rem 0;
         border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.7rem;
     }
     
-    .nav-item:hover {
-        background: rgba(255,255,255,0.15);
-        transform: translateX(5px);
+    /* Navigation section header */
+    section[data-testid="stSidebar"] h3 {
+        color: white !important;
+        font-weight: bold;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
     }
     
-    .nav-item.active {
-        background: rgba(255,255,255,0.2);
-        border-left: 4px solid #fbbf24;
+    /* Style custom buttons */
+    section[data-testid="stSidebar"] .stButton > button {
+        width: 100% !important;
+        background: rgba(255,255,255,0.1) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 0.7rem 1rem !important;
+        margin: 0.2rem 0 !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease !important;
+        text-align: left !important;
     }
     
-    /* Icon styling */
-    .nav-icon {
-        font-size: 1.2rem;
-        width: 24px;
-        text-align: center;
+    section[data-testid="stSidebar"] .stButton > button:hover {
+        background: rgba(255,255,255,0.2) !important;
+        transform: translateX(3px) !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
     }
     
-    /* Streamlit sidebar background override */
-    .css-1d391kg {
-        background: linear-gradient(180deg, #1e3a8a 0%, #3b82f6 100%);
+    /* Footer styling */
+    section[data-testid="stSidebar"] hr {
+        border-color: rgba(255,255,255,0.3) !important;
+        margin: 1.5rem 0 !important;
     }
     
-    /* Sidebar text color override */
-    .css-1d391kg .css-1v0mbdj {
-        color: white;
+    section[data-testid="stSidebar"] p {
+        color: white !important;
+        text-align: center !important;
     }
     </style>
     """, unsafe_allow_html=True)
