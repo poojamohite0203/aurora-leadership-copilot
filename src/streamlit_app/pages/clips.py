@@ -1,4 +1,3 @@
-# ui/pages/clips.py
 import streamlit as st
 from utils.api_client import get_clips, get_clip_details
 
@@ -19,15 +18,3 @@ else:
     st.write(f"**Summary:** {details.get('summary', '')}")
     st.write("📝 Full Text")
     st.write(details.get("text", ""))
-
-    with st.expander("✅ Action Items"):
-        for a in details.get("action_items", []):
-            st.write(f"- {a['description']} (due: {a.get('due_date','N/A')})")
-
-    with st.expander("🗳 Decisions"):
-        for d in details.get("decisions", []):
-            st.write(f"- {d['description']}")
-
-    with st.expander("⛔ Blockers"):
-        for b in details.get("blockers", []):
-            st.write(f"- {b['description']}")

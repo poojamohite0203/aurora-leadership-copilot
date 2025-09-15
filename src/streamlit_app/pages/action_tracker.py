@@ -1,4 +1,3 @@
-# ui/pages/action_items.py
 import streamlit as st
 from utils.api_client import get_action_items
 

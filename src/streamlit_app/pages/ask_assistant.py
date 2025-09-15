@@ -1,4 +1,3 @@
-# ui/pages/ask.py
 import streamlit as st
 from utils.api_client import ask_ai
 

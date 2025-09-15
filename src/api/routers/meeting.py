@@ -22,7 +22,30 @@ def get_all_meetings(
     Optional date filtering with from_date and to_date query parameters.
     """
     try:
-        return crud.get_all_meetings(db, from_date, to_date)
+        meetings = crud.get_all_meetings(db, from_date, to_date)
+
+        return [
+            {
+                "id": m.id,
+                "title": m.title,
+                "date": m.date,
+                "participants": m.participants,
+                "summary": m.summary,
+                "action_items": [
+                    {"id": a.id, "description": a.description, "due_date": a.due_date}
+                    for a in m.action_items
+                ],
+                "decisions": [
+                    {"id": d.id, "description": d.description, "other_options": d.other_options}
+                    for d in m.decisions
+                ],
+                "blockers": [
+                    {"id": b.id, "description": b.description}
+                    for b in m.blockers
+                ]
+            }
+            for m in meetings
+    ]
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -50,5 +73,17 @@ def get_meeting_details(id: int = Path(...), db: Session = Depends(get_db)):
         "title": meeting.title,
         "summary": meeting.summary,
         "date": meeting.date,
-        "participants": meeting.participants
+        "participants": meeting.participants,
+        "action_items": [
+            {"id": a.id, "description": a.description, "due_date": a.due_date}
+            for a in meeting.action_items
+        ],
+        "decisions": [
+            {"id": d.id, "description": d.description, "other_options": d.other_options}
+            for d in meeting.decisions
+        ],
+        "blockers": [
+            {"id": b.id, "description": b.description}
+            for b in meeting.blockers
+        ]
     }

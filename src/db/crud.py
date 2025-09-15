@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 from core import prompt_templates
 from db import models
+from sqlalchemy.orm import joinedload
 
 def parse_due_date(due_date_str):
     """Convert due_date string to datetime object or None"""
@@ -72,7 +73,11 @@ def create_blockers(db: Session, items: list, source: str, source_id: int, meeti
 
 def get_all_meetings(db: Session, from_date: Optional[str] = None, to_date: Optional[str] = None):
     """Get all meetings with optional date filtering"""
-    query = db.query(models.Meeting)
+    query = db.query(models.Meeting).options(
+        joinedload(models.Meeting.action_items),
+        joinedload(models.Meeting.decisions),
+        joinedload(models.Meeting.blockers)
+    )
     
     if from_date:
         from_datetime = datetime.strptime(from_date, "%Y-%m-%d")
@@ -86,9 +91,17 @@ def get_all_meetings(db: Session, from_date: Optional[str] = None, to_date: Opti
 
 
 def get_meeting_by_id(db: Session, meeting_id: int):
-    """Get a specific meeting by ID"""
-    return db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first()
-
+    """Get a specific meeting by ID with related action_items, decisions, and blockers eagerly loaded"""
+    return (
+        db.query(models.Meeting)
+        .options(
+            joinedload(models.Meeting.action_items),
+            joinedload(models.Meeting.decisions),
+            joinedload(models.Meeting.blockers)
+        )
+        .filter(models.Meeting.id == meeting_id)
+        .first()
+    )
 
 def get_all_clips(db: Session, limit: Optional[int] = None):
     """Get all clips with optional limit"""

@@ -1,4 +1,3 @@
-# ui/pages/journals.py
 import streamlit as st
 from utils.api_client import get_journals, get_journal_details
 

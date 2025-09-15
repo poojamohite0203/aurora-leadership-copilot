@@ -1,4 +1,3 @@
-# ui/pages/meetings.py
 import streamlit as st
 from utils.api_client import get_meetings, get_meeting_details
 
@@ -8,7 +7,11 @@ st.title("📅 Meetings")
 
 # ---- Fetch meetings ----
 meetings = get_meetings()
-
+# st.write("Debug - meetings content:", meetings) -- degugger info on  UI
+# Safety check: ensure meetings is a list of dicts
+if isinstance(meetings, str):
+    st.error("API returned a string instead of JSON. Check your api_client.py")
+    st.stop()
 if not meetings:
     st.info("No meetings found yet.")
 else:
@@ -39,3 +42,14 @@ else:
 
     with st.expander("🗳 Decisions"):
         if details.get("decisions"):
+            for d in details["decisions"]:
+                st.write(f"- {d['description']}")
+        else:
+            st.write("No decisions.")
+
+    with st.expander("⛔ Blockers"):
+        if details.get("blockers"):
+            for b in details["blockers"]:
+                st.write(f"- {b['description']}")
+        else:
+            st.write("No blockers.")
