@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from db.database import Base
 import enum
 from typing import Optional
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Enum, ARRAY
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Enum, ARRAY, JSON
 class SourceEnum(str, enum.Enum):
     MEETING = "meeting"
     JOURNAL = "journal"
@@ -17,7 +17,7 @@ class Meeting(Base):
     participants = Column(String)
     summary = Column(String)
 
-    actions = relationship("ActionItem", back_populates="meeting")
+    action_items = relationship("Action_Item", back_populates="meeting")
     decisions = relationship("Decision", back_populates="meeting")
     blockers = relationship("Blocker", back_populates="meeting")
 

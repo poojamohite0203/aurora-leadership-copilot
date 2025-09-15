@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from api.routers import meeting
+from api.routers import clip
+from api.routers import journal
 from db.database import engine
 from db import models
 
@@ -11,6 +13,10 @@ def health_check():
 
 # Register routers
 app.include_router(meeting.router, prefix="/meeting", tags=["Meeting"])
+
+app.include_router(clip.router, prefix="/clip", tags=["Clip"])
+
+app.include_router(journal.router, prefix="/journal", tags=["Journal"])
 
 # create tables 
 models.Base.metadata.create_all(bind=engine)

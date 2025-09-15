@@ -2,21 +2,22 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from api.services.process_service import extract_and_create_clip
 from sqlalchemy.orm import Session
-from src.db import models, get_db
+from db import models
+from db.database import get_db
 
-router = APIRouter(prefix="/clips", tags=["clips"])
+router = APIRouter(tags=["Clip"])
 
 class ClipInput(BaseModel):
     text: str
 
 @router.post("/extract")
-def extract_clip(input: ClipInput):
+def extract_clip(input: ClipInput, db: Session = Depends(get_db)):
     """
     Extract structured clip info from text,
     save to DB, and return full clip data.
     """
     try:
-        clip_info = extract_and_create_clip(input.text)
+        clip_info = extract_and_create_clip(input.text, db)
         return clip_info
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

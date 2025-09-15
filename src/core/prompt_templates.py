@@ -2,24 +2,6 @@ import re
 from core.llm_utils import query_ollama
 import json
 
-# EXTRACTION_PROMPT = """
-# You are an assistant that extracts structured meeting insights.
-# Given the following text, extract:
-# - Decisions
-# - Action Items
-# - Blockers
-
-# Return JSON in this format:
-# {{
-#   "decisions": [...],
-#   "action_items": [...],
-#   "blockers": [...]
-# }}
-
-# Meeting transcript:
-# "{text}"
-# """
-
 MEETING_EXTRACTION_PROMPT = """
 You are an AI assistant. Extract structured information from a meeting transcript. 
 Return the output in strict JSON format.
@@ -37,7 +19,7 @@ Output JSON fields:
       {{'description': '...', 'due_date': '...'}}
   ],
   'decisions': [
-      {{'description': '...', 'other_options': ['...']}}
+      {{'description': '...', 'other_options': {{}}}}
   ],
   'blockers': [
       {{'description': '...'}}
@@ -70,7 +52,7 @@ Output JSON fields:
       {{'description': '...', 'due_date': '...'}}
   ],
   'decisions': [
-      {{'description': '...', 'other_options': ['...']}}
+      {{'description': '...', 'other_options': {{}}}}
   ],
   'blockers': [
       {{'description': '...'}}
@@ -105,7 +87,7 @@ Output JSON fields:
       {{'description': '...', 'due_date': '...'}}
   ],
   'decisions': [
-      {{'description': '...', 'other_options': ['...']}}
+      {{'description': '...', 'other_options': {{}}}}
   ],
   'blockers': [
       {{'description': '...'}}

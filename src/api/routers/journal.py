@@ -2,22 +2,22 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from api.services.process_service import extract_and_create_journal
 from sqlalchemy.orm import Session
-from src.db import models
-from src.api.dependencies import get_db
+from db import models
+from db.database import get_db
 
-router = APIRouter(prefix="/journal", tags=["journal"])
+router = APIRouter(tags=["Journal"])
 
 class JournalInput(BaseModel):
     text: str
 
 @router.post("/extract")
-def extract_journal(input: JournalInput):
+def extract_journal(input: JournalInput, db: Session = Depends(get_db)):
     """
     Extract structured journal info from text,
     save to DB, and return full journal data.
     """
     try:
-        journal_info = extract_and_create_journal(input.text)
+        journal_info = extract_and_create_journal(input.text, db)
         return journal_info
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

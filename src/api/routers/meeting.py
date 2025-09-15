@@ -3,20 +3,21 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from api.services.process_service import extract_and_create_meeting
 from db.database import get_db
+from db import models
 
-router = APIRouter(prefix="/meeting", tags=["meeting"])
+router = APIRouter(tags=["Meeting"])
 
 class TranscriptInput(BaseModel):
     transcript: str
 
 @router.post("/extract")
-def extract_meeting(input: TranscriptInput):
+def extract_meeting(input: TranscriptInput, db: Session = Depends(get_db)):
     """
     Extract structured meeting info from transcript,
     save to DB, and return full meeting data.
     """
     try:
-        meeting_info = extract_and_create_meeting(input.transcript)
+        meeting_info = extract_and_create_meeting(input.transcript, db)
         return meeting_info
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

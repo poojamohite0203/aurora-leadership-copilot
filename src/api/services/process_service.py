@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
 from typing import Optional
@@ -7,8 +7,6 @@ from db.database import get_db
 from core import prompt_templates
 from db import models
 from core import extract_insights_from_text
-
-router = APIRouter()
 
 
 def create_action_items(db: Session, items: list, source: str, source_id: int, meeting_id: Optional[int] = None, personal: bool = False):
@@ -31,7 +29,7 @@ def create_decisions(db: Session, items: list, source: str, source_id: int, meet
             source=source,
             source_id=source_id,
             description=item.get("description", ""),
-            other_options=item.get("other_options", []),
+            other_options=item.get("other_options", {}),
             personal=personal
         )
         db.add(decision)
@@ -49,8 +47,7 @@ def create_blockers(db: Session, items: list, source: str, source_id: int, meeti
         db.add(blocker)
 
 
-@router.post("/extract/meeting")
-def extract_and_create_meeting(transcript: str, db: Session = Depends(get_db)):
+def extract_and_create_meeting(transcript: str, db: Session):
     """
     Extract structured data from meeting transcript using LLM.
     Saves Meeting, ActionItems, Decisions, Blockers into DB.
@@ -93,8 +90,7 @@ def extract_and_create_meeting(transcript: str, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/extract/clip")
-def extract_and_create_clip(text: str, db: Session = Depends(get_db)):
+def extract_and_create_clip(text: str, db: Session):
     """
     Extract ActionItems, Decisions, Blockers from a clip or chat text.
     Saves to DB as Clip and related tables.
@@ -129,8 +125,7 @@ def extract_and_create_clip(text: str, db: Session = Depends(get_db)):
     }
 
 
-@router.post("/extract/journal")
-def extract_and_create_journal(text: str, db: Session = Depends(get_db)):
+def extract_and_create_journal(text: str, db: Session):
     """
     Extract structured insights from personal journal text.
     Saves Journal entry and associated ActionItems, Decisions, Blockers.
