@@ -1,14 +1,30 @@
-from fastapi import APIRouter, HTTPException, Path, Depends
+from fastapi import APIRouter, HTTPException, Path, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from api.services.process_service import extract_and_create_meeting
 from db.database import get_db
-from db import models
+from db import crud
+from typing import Optional
 
 router = APIRouter(tags=["Meeting"])
 
 class TranscriptInput(BaseModel):
     transcript: str
+
+@router.get("")
+def get_all_meetings(
+    db: Session = Depends(get_db),
+    from_date: Optional[str] = Query(None, description="Filter meetings from this date (YYYY-MM-DD)"),
+    to_date: Optional[str] = Query(None, description="Filter meetings to this date (YYYY-MM-DD)")
+):
+    """
+    Return all meetings without nested action items, decisions, and blockers.
+    Optional date filtering with from_date and to_date query parameters.
+    """
+    try:
+        return crud.get_all_meetings(db, from_date, to_date)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/extract")
 def extract_meeting(input: TranscriptInput, db: Session = Depends(get_db)):
@@ -24,19 +40,15 @@ def extract_meeting(input: TranscriptInput, db: Session = Depends(get_db)):
 
 @router.get("/{id}")
 def get_meeting_details(id: int = Path(...), db: Session = Depends(get_db)):
-    meeting = db.query(models.Meeting).filter(models.Meeting.id == id).first()
+    """Get a specific meeting by ID without nested data"""
+    meeting = crud.get_meeting_by_id(db, id)
     if not meeting:
         raise HTTPException(status_code=404, detail="Meeting not found")
-    action_items = db.query(models.Action_Item).filter(models.Action_Item.meeting_id == id).all()
-    decisions = db.query(models.Decision).filter(models.Decision.meeting_id == id).all()
-    blockers = db.query(models.Blocker).filter(models.Blocker.meeting_id == id).all()
+    
     return {
         "id": meeting.id,
         "title": meeting.title,
         "summary": meeting.summary,
         "date": meeting.date,
-        "participants": meeting.participants,
-        "action_items": [a.__dict__ for a in action_items],
-        "decisions": [d.__dict__ for d in decisions],
-        "blockers": [b.__dict__ for b in blockers]
+        "participants": meeting.participants
     }

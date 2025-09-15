@@ -1,14 +1,30 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
 from api.services.process_service import extract_and_create_journal
 from sqlalchemy.orm import Session
-from db import models
+from db import crud
 from db.database import get_db
+from typing import Optional
 
 router = APIRouter(tags=["Journal"])
 
 class JournalInput(BaseModel):
     text: str
+
+@router.get("")
+def get_all_journals(
+    db: Session = Depends(get_db),
+    limit: Optional[int] = Query(None, description="Limit the number of journals returned")
+):
+    """
+    Return all journals without nested action items, decisions, and blockers.
+    Optional limit parameter to control the number of results.
+    """
+    try:
+        return crud.get_all_journals(db, limit)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/extract")
 def extract_journal(input: JournalInput, db: Session = Depends(get_db)):
@@ -24,21 +40,17 @@ def extract_journal(input: JournalInput, db: Session = Depends(get_db)):
 
 @router.get("/{id}")
 def get_journal_details(id: int, db: Session = Depends(get_db)):
-    journal = db.query(models.Journal).filter(models.Journal.id == id).first()
+    """Get a specific journal by ID without nested data"""
+    journal = crud.get_journal_by_id(db, id)
     if not journal:
         raise HTTPException(status_code=404, detail="Journal not found")
-    action_items = db.query(models.Action_Item).filter(models.Action_Item.source == "journal", models.Action_Item.source_id == id).all()
-    decisions = db.query(models.Decision).filter(models.Decision.source == "journal", models.Decision.source_id == id).all()
-    blockers = db.query(models.Blocker).filter(models.Blocker.source == "journal", models.Blocker.source_id == id).all()
+    
     return {
         "id": journal.id,
         "text": journal.text,
         "summary": journal.summary,
         "date": journal.date,
-        "theme": getattr(journal, "theme", None),
-        "strength": getattr(journal, "strength", None),
-        "growth_area": getattr(journal, "growth_area", None),
-        "action_items": [a.__dict__ for a in action_items],
-        "decisions": [d.__dict__ for d in decisions],
-        "blockers": [b.__dict__ for b in blockers]
+        "theme": journal.theme,
+        "strength": journal.strength,
+        "growth_area": journal.growth_area
     }

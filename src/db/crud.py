@@ -68,3 +68,53 @@ def create_blockers(db: Session, items: list, source: str, source_id: int, meeti
             personal=personal
         )
         db.add(blocker)
+
+
+def get_all_meetings(db: Session, from_date: Optional[str] = None, to_date: Optional[str] = None):
+    """Get all meetings with optional date filtering"""
+    query = db.query(models.Meeting)
+    
+    if from_date:
+        from_datetime = datetime.strptime(from_date, "%Y-%m-%d")
+        query = query.filter(models.Meeting.date >= from_datetime)
+    
+    if to_date:
+        to_datetime = datetime.strptime(to_date, "%Y-%m-%d")
+        query = query.filter(models.Meeting.date <= to_datetime)
+    
+    return query.all()
+
+
+def get_meeting_by_id(db: Session, meeting_id: int):
+    """Get a specific meeting by ID"""
+    return db.query(models.Meeting).filter(models.Meeting.id == meeting_id).first()
+
+
+def get_all_clips(db: Session, limit: Optional[int] = None):
+    """Get all clips with optional limit"""
+    query = db.query(models.Clip).order_by(models.Clip.date.desc())
+    
+    if limit:
+        query = query.limit(limit)
+    
+    return query.all()
+
+
+def get_clip_by_id(db: Session, clip_id: int):
+    """Get a specific clip by ID"""
+    return db.query(models.Clip).filter(models.Clip.id == clip_id).first()
+
+
+def get_all_journals(db: Session, limit: Optional[int] = None):
+    """Get all journals with optional limit"""
+    query = db.query(models.Journal).order_by(models.Journal.date.desc())
+    
+    if limit:
+        query = query.limit(limit)
+    
+    return query.all()
+
+
+def get_journal_by_id(db: Session, journal_id: int):
+    """Get a specific journal by ID"""
+    return db.query(models.Journal).filter(models.Journal.id == journal_id).first()
