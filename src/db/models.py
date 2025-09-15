@@ -37,44 +37,41 @@ class Clip(Base):
     summary = Column(String)
     date = Column(DateTime)
 
-class ActionItem(Base):
-    __tablename__ = "action_items"
+class Action_Item(Base):
+    __tablename__ = "action_item"
+
     id = Column(Integer, primary_key=True, index=True)
+    meeting_id = Column(Integer, ForeignKey("meeting.id"), nullable=True)
     description = Column(String)
-    date = Column(DateTime)
-    due_date = Column(DateTime)
-    status = Column(String, default="open")
+    due_date = Column(DateTime, nullable=True)
+    
     personal = Column(Boolean, default=False)
+    source: Optional[str] = Column(String, nullable=True)
+    source_id: Optional[int] = Column(Integer, nullable=True)
 
-    source = Column(Enum(SourceEnum))
-    source_id = Column(Integer)
-    meeting_id = Column(Integer, ForeignKey("meetings.id"))
-
-    meeting = relationship("Meeting", back_populates="actions")
+    meeting = relationship("Meeting", back_populates="action_items")
 
 class Decision(Base):
-    __tablename__ = "decisions"
-    id = Column(Integer, primary_key=True, index=True)
-    description = Column(String)
-    date = Column(DateTime)
-    other_options = Column(String)  # JSON/array later
-    personal = Column(Boolean, default=False)
+    __tablename__ = "decision"
 
-    source = Column(Enum(SourceEnum))
-    source_id = Column(Integer)
-    meeting_id = Column(Integer, ForeignKey("meetings.id"))
+    id = Column(Integer, primary_key=True, index=True)
+    meeting_id = Column(Integer, ForeignKey("meeting.id"), nullable=True)
+    description = Column(String)
+    other_options = Column(ARRAY(String), nullable=True)
+    personal = Column(Boolean, default=False)
+    source: Optional[str] = Column(String, nullable=True)
+    source_id: Optional[int] = Column(Integer, nullable=True)
 
     meeting = relationship("Meeting", back_populates="decisions")
 
 class Blocker(Base):
-    __tablename__ = "blockers"
-    id = Column(Integer, primary_key=True, index=True)
-    description = Column(String)
-    date = Column(DateTime)
-    personal = Column(Boolean, default=False)
+    __tablename__ = "blocker"
 
-    source = Column(Enum(SourceEnum))
-    source_id = Column(Integer)
-    meeting_id = Column(Integer, ForeignKey("meetings.id"))
+    id = Column(Integer, primary_key=True, index=True)
+    meeting_id = Column(Integer, ForeignKey("meeting.id"), nullable=True)
+    description = Column(String)
+    personal = Column(Boolean, default=False)
+    source: Optional[str] = Column(String, nullable=True)
+    source_id: Optional[int] = Column(Integer, nullable=True)
 
     meeting = relationship("Meeting", back_populates="blockers")

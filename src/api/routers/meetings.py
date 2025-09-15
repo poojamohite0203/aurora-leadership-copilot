@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from services.meeting_service import extract_and_create_meeting
+from src.api.services.process_service import extract_and_create_meeting
 
 router = APIRouter(prefix="/meetings", tags=["meetings"])
 
