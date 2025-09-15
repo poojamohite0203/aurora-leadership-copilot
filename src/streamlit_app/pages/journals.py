@@ -1,8 +1,12 @@
 import streamlit as st
 from utils.api_client import get_journals, get_journal_details, extract_journal
+from sidebar import render_sidebar
 
 st.set_page_config(page_title="Journals", layout="wide")
 st.title("📔 Journals")
+
+# Render the custom sidebar
+render_sidebar()
 
 # Add new journal section
 st.header("➕ Add New Journal Entry")

@@ -1,5 +1,9 @@
 import streamlit as st
 from utils.api_client import search_items
+from sidebar import render_sidebar
+
+# Render the custom sidebar
+render_sidebar()
 
 st.set_page_config(page_title="Search", layout="wide")
 st.title("🔍 Search Knowledge Base")

@@ -1,8 +1,12 @@
 import streamlit as st
 from utils.api_client import get_clips, get_clip_details, extract_clip
+from sidebar import render_sidebar
 
 st.set_page_config(page_title="Clips", layout="wide")
 st.title("📋 Clipboard History")
+
+# Render the custom sidebar
+render_sidebar()
 
 # Add new clip section
 st.header("➕ Add New Clip")
