@@ -14,7 +14,7 @@ class Meeting(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
     date = Column(DateTime)
-    participants = Column(String)
+    participants = Column(JSON)  # Changed to JSON to store lists
     summary = Column(String)
 
     action_items = relationship("Action_Item", back_populates="meeting")
