@@ -59,6 +59,11 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
 
 --- 
 ```   
+
+## Run the Stream Lit UI
+    # Will render on http://localhost:8501
+    streamlit run streamlit_app/app.py  
+
 ## API's
     /vector/search
         Purpose: Pure retrieval from the vector DB.
