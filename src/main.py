@@ -4,6 +4,9 @@ from api.routers import clip
 from api.routers import journal
 from api.routers import rag
 from api.routers import search
+from api.routers import action_item
+from api.routers import decision
+from api.routers import blocker
 from db.database import engine
 from db import models
 
@@ -19,6 +22,12 @@ app.include_router(meeting.router, prefix="/meeting", tags=["Meeting"])
 app.include_router(clip.router, prefix="/clip", tags=["Clip"])
 
 app.include_router(journal.router, prefix="/journal", tags=["Journal"])
+
+app.include_router(action_item.router, prefix="/action_item", tags=["Action Items"])
+
+app.include_router(decision.router, prefix="/decision", tags=["Decisions"])
+
+app.include_router(blocker.router, prefix="/blocker", tags=["Blockers"])
 
 app.include_router(search.router, prefix="/vector", tags=["Search"])
 

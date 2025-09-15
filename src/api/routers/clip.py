@@ -1,14 +1,30 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
 from api.services.process_service import extract_and_create_clip
 from sqlalchemy.orm import Session
-from db import models
+from db import crud
 from db.database import get_db
+from typing import Optional
 
 router = APIRouter(tags=["Clip"])
 
 class ClipInput(BaseModel):
     text: str
+
+@router.get("")
+def get_all_clips(
+    db: Session = Depends(get_db),
+    limit: Optional[int] = Query(None, description="Limit the number of clips returned")
+):
+    """
+    Return all clips without nested action items, decisions, and blockers.
+    Optional limit parameter to control the number of results.
+    """
+    try:
+        return crud.get_all_clips(db, limit)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/extract")
 def extract_clip(input: ClipInput, db: Session = Depends(get_db)):
@@ -24,18 +40,14 @@ def extract_clip(input: ClipInput, db: Session = Depends(get_db)):
 
 @router.get("/{id}")
 def get_clip_details(id: int, db: Session = Depends(get_db)):
-    clip = db.query(models.Clip).filter(models.Clip.id == id).first()
+    """Get a specific clip by ID without nested data"""
+    clip = crud.get_clip_by_id(db, id)
     if not clip:
         raise HTTPException(status_code=404, detail="Clip not found")
-    action_items = db.query(models.Action_Item).filter(models.Action_Item.source == "clip", models.Action_Item.source_id == id).all()
-    decisions = db.query(models.Decision).filter(models.Decision.source == "clip", models.Decision.source_id == id).all()
-    blockers = db.query(models.Blocker).filter(models.Blocker.source == "clip", models.Blocker.source_id == id).all()
+    
     return {
         "id": clip.id,
         "text": clip.text,
         "summary": clip.summary,
-        "date": clip.date,
-        "action_items": [a.__dict__ for a in action_items],
-        "decisions": [d.__dict__ for d in decisions],
-        "blockers": [b.__dict__ for b in blockers]
+        "date": clip.date
     }

@@ -1,61 +1,102 @@
-aurora-ai-copilot/
-│
-├── README.md
-├── requirements.txt
-├── setup.py                  # Optional if packaging as Python module
-├── .gitignore
-│
-├── data/                     # Store local transcripts, audio, temp CSV/JSON
-│   ├── transcripts/
-│   ├── action_items/
-│   └── journal_entries/
-│
-├── notebooks/                # Jupyter notebooks for experiments
-│   ├── v0.1_core_llm_test.ipynb
-│   ├── v0.2_meeting_parser.ipynb
-│   └── v0.5_journal_analysis.ipynb
-│
-├── src/
-│   ├── __init__.py
-│   ├── config.py             # API keys, file paths, model configs
-│
-│   ├── core/
-│   │   ├── ollama_client.py      # LLM prompts, rephrasing, summarization
-│   │   ├── speech_pipeline.py # Whisper audio -> text
-│   │   └── prompt_templates.py
-│
-│   ├── data_pipeline/
-│   │   ├── db_manager.py     # SQLite/Postgres ORM models
-│   │   ├── jira_connector.py
-│   │   ├── github_connector.py
-│   │   └── vector_store.py   # For embeddings & RAG
-│
-│   ├── features/
-│   │   ├── meeting_tracker.py  # Extract action items, decisions
-│   │   ├── status_reporter.py  # Executive & engineer summaries
-│   │   ├── decision_helper.py  # Trade-off analysis & scoring
-│   │   ├── career_journal.py   # Weekly input, theme extraction
-│   │   └── infographic_gen.py  # Diffusion + ControlNet visualization
-│
-│   ├── utils/
-│   │   ├── logger.py
-│   │   ├── email_sender.py
-│   │   └── helpers.py
-│
-│   └── dashboard/
-│       ├── streamlit_app.py    # Main dashboard entry point
-│       └── components/
-│           ├── meeting_ui.py
-│           ├── clips_ui.py
-│           ├── decision_ui.py
-│           └── journal_ui.py
-│
-├── tests/
-│   ├── test_llm_utils.py
-│   ├── test_db_manager.py
-│   └── test_features.py
-│
-└── docs/
-    ├── architecture.md
-    ├── roadmap.md
-    └── user_guide.md
+
+All EndPoints 
+
+GET
+/meeting
+Get All Meetings
+
+
+POST
+/meeting/extract
+Extract Meeting
+
+
+GET
+/meeting/{id}
+Get Meeting Details
+
+Clip
+
+
+GET
+/clip
+Get All Clips
+
+
+POST
+/clip/extract
+Extract Clip
+
+
+GET
+/clip/{id}
+Get Clip Details
+
+Journal
+
+
+GET
+/journal
+Get All Journals
+
+
+POST
+/journal/extract
+Extract Journal
+
+
+GET
+/journal/{id}
+Get Journal Details
+
+Action Items
+
+
+GET
+/action_item
+Get All Action Items
+
+
+GET
+/action_item/{id}
+Get Action Item Details
+
+Decisions
+
+
+GET
+/decision
+Get All Decisions
+
+
+GET
+/decision/{id}
+Get Decision Details
+
+Blockers
+
+
+GET
+/blocker
+Get All Blockers
+
+
+GET
+/blocker/{id}
+Get Blocker Details
+
+Search
+
+
+GET
+/vector/search
+Search Items
+
+RAG
+
+
+GET
+/rag/ask
+Ask
+
+

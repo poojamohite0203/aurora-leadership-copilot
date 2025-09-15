@@ -119,9 +119,9 @@ def extract_insights_from_text(
         dict: Parsed JSON output from LLM or raw output on failure.
     """
     prompt = prompt_template.format(text=text)
-    print("Prompt being sent to LLM:", prompt)
+    # print("Prompt being sent to LLM:", prompt)
     response = query_ollama(prompt)
-    print("Raw LLM Response:", response)
+    # print("Raw LLM Response:", response)
 
     try:
         # First try fenced ```json blocks
