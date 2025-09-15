@@ -6,3 +6,5 @@ pytest==7.2.2
 fastapi
 uvicorn
 sqlalchemy
+chromadb
+sentence-transformers
