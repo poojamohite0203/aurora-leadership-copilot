@@ -118,3 +118,48 @@ def get_all_journals(db: Session, limit: Optional[int] = None):
 def get_journal_by_id(db: Session, journal_id: int):
     """Get a specific journal by ID"""
     return db.query(models.Journal).filter(models.Journal.id == journal_id).first()
+
+
+def get_all_action_items(db: Session, limit: Optional[int] = None):
+    """Get all action items with optional limit"""
+    query = db.query(models.Action_Item).order_by(models.Action_Item.id.desc())
+    
+    if limit:
+        query = query.limit(limit)
+    
+    return query.all()
+
+
+def get_action_item_by_id(db: Session, action_item_id: int):
+    """Get a specific action item by ID"""
+    return db.query(models.Action_Item).filter(models.Action_Item.id == action_item_id).first()
+
+
+def get_all_decisions(db: Session, limit: Optional[int] = None):
+    """Get all decisions with optional limit"""
+    query = db.query(models.Decision).order_by(models.Decision.id.desc())
+    
+    if limit:
+        query = query.limit(limit)
+    
+    return query.all()
+
+
+def get_decision_by_id(db: Session, decision_id: int):
+    """Get a specific decision by ID"""
+    return db.query(models.Decision).filter(models.Decision.id == decision_id).first()
+
+
+def get_all_blockers(db: Session, limit: Optional[int] = None):
+    """Get all blockers with optional limit"""
+    query = db.query(models.Blocker).order_by(models.Blocker.id.desc())
+    
+    if limit:
+        query = query.limit(limit)
+    
+    return query.all()
+
+
+def get_blocker_by_id(db: Session, blocker_id: int):
+    """Get a specific blocker by ID"""
+    return db.query(models.Blocker).filter(models.Blocker.id == blocker_id).first()
