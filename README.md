@@ -62,7 +62,7 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
 
 ## Run the Stream Lit UI
     # Will render on http://localhost:8501
-    streamlit run streamlit_app/app.py  
+    streamlit run src/streamlit_app/app.py  
 
 ## API's
     /vector/search
@@ -193,6 +193,9 @@ Sidebar
     📋 Clipboard History (Clips)
 
     📅 Meetings
+        Action Items
+        Blockers
+        Decisions
 
     📔 Journals
 
