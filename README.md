@@ -175,6 +175,30 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
 [📄 View the Flow in PFD ](./docs/system_flow_diagram.pdf)
 ![Alt text for accessibility](docs/system_flow_diagram.png)
 
+### UI Flow
+
+Sidebar
+
+    Title: AI Productivity Hub 
+    
+    HomePage : Dashboard 
+
+    Navigation options:
+
+    📋 Clipboard History (Clips)
+
+    📅 Meetings
+
+    📔 Journals
+
+    📊 Weekly Status Reports
+
+    🔍 Search
+
+    🤖 Ask Assistant
+
+
+
 
 
 
