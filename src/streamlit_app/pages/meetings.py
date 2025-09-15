@@ -10,8 +10,8 @@ st.header("➕ Add New Meeting")
 with st.expander("Add Meeting Transcript", expanded=False):
     transcript_text = st.text_area(
         "Enter meeting transcript:",
-        placeholder="Paste your meeting transcript here...",
-        height=200,
+        placeholder="Paste your raw meeting transcript here (with timestamps, speaker names, etc.). The AI will automatically parse and extract insights.\n\nExample:\n'John Smith 9:30 AM: Let's discuss the API integration...\nJane Doe 9:32 AM: I think we should prioritize security...'",
+        height=250,
         key="meeting_transcript"
     )
     

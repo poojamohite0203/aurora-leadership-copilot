@@ -1,5 +1,4 @@
-from fastapi import APIRouter, HTTPException, Path, Depends, Query
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Path, Depends, Query, Body
 from sqlalchemy.orm import Session
 from api.services.process_service import extract_and_create_meeting
 from db.database import get_db
@@ -7,9 +6,6 @@ from db import crud
 from typing import Optional
 
 router = APIRouter(tags=["Meeting"])
-
-class TranscriptInput(BaseModel):
-    transcript: str
 
 @router.get("")
 def get_all_meetings(
@@ -50,13 +46,13 @@ def get_all_meetings(
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/extract")
-def extract_meeting(input: TranscriptInput, db: Session = Depends(get_db)):
+def extract_meeting(transcript: str = Body(..., media_type="text/plain"), db: Session = Depends(get_db)):
     """
-    Extract structured meeting info from transcript,
-    save to DB, and return full meeting data.
+    Extract structured meeting info from raw transcript text.
+    Just paste your meeting transcript directly - no JSON formatting needed!
     """
     try:
-        meeting_info = extract_and_create_meeting(input.transcript, db)
+        meeting_info = extract_and_create_meeting(transcript, db)
         return meeting_info
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

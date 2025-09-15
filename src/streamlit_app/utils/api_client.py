@@ -31,7 +31,11 @@ def get_meeting_details(meeting_id):
 
 def extract_meeting(transcript):
     try:
-        response = requests.post(f"{BASE_URL}/meeting/extract", json={"transcript": transcript})
+        response = requests.post(
+            f"{BASE_URL}/meeting/extract", 
+            data=transcript,
+            headers={"Content-Type": "text/plain"}
+        )
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
@@ -56,7 +60,11 @@ def get_clip_details(clip_id: int):
 
 def extract_clip(text):
     try:
-        response = requests.post(f"{BASE_URL}/clip/extract", json={"text": text})
+        response = requests.post(
+            f"{BASE_URL}/clip/extract",
+            data=text,
+            headers={"Content-Type": "text/plain"}
+        )
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
@@ -81,7 +89,11 @@ def get_journal_details(journal_id: int):
 
 def extract_journal(text):
     try:
-        response = requests.post(f"{BASE_URL}/journal/extract", json={"text": text})
+        response = requests.post(
+            f"{BASE_URL}/journal/extract",
+            data=text,
+            headers={"Content-Type": "text/plain"}
+        )
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
@@ -127,7 +139,7 @@ def search_items(query: str):
     return []
 
 def ask_ai(query: str):
-    resp = requests.post(f"{BASE_URL}/ask", json={"query": query})
+    resp = requests.get(f"{BASE_URL}/ask", params={"query": query})
     if resp.status_code == 200:
         return resp.json()
     return {"answer": "", "contexts": []}

@@ -29,9 +29,9 @@ app.include_router(decision.router, prefix="/decision", tags=["Decisions"])
 
 app.include_router(blocker.router, prefix="/blocker", tags=["Blockers"])
 
-app.include_router(search.router, prefix="/vector", tags=["Search"])
+app.include_router(search.router, prefix="", tags=["Search"])
 
-app.include_router(rag.router, prefix="/rag", tags=["RAG"])
+app.include_router(rag.router, prefix="", tags=["RAG"])
 
 
 # create tables 

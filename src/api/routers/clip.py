@@ -1,5 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Depends, Query, Body
 from api.services.process_service import extract_and_create_clip
 from sqlalchemy.orm import Session
 from db import crud
@@ -7,9 +6,6 @@ from db.database import get_db
 from typing import Optional
 
 router = APIRouter(tags=["Clip"])
-
-class ClipInput(BaseModel):
-    text: str
 
 @router.get("")
 def get_all_clips(
@@ -27,13 +23,13 @@ def get_all_clips(
 
 
 @router.post("/extract")
-def extract_clip(input: ClipInput, db: Session = Depends(get_db)):
+def extract_clip(text: str = Body(..., media_type="text/plain"), db: Session = Depends(get_db)):
     """
-    Extract structured clip info from text,
-    save to DB, and return full clip data.
+    Extract structured clip info from raw text.
+    Just paste your text directly - no JSON formatting needed!
     """
     try:
-        clip_info = extract_and_create_clip(input.text, db)
+        clip_info = extract_and_create_clip(text, db)
         return clip_info
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

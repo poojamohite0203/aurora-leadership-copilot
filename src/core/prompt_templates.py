@@ -4,11 +4,19 @@ import json
 
 MEETING_EXTRACTION_PROMPT = """
 You are an AI assistant. Extract structured information from a meeting transcript. 
+The transcript may include timestamps, speaker names, and natural conversation flow.
+Parse the content regardless of format (timestamps, speaker labels, etc.).
 Return the output in strict JSON format.
 
 Transcript:
 "{text}"
 
+Instructions:
+- Extract participant names from speaker labels (e.g., "Luong, Vito (V.)", "Jeter, Colton (C.)")
+- Ignore timestamps and formatting artifacts  
+- Focus on the actual conversation content
+- Identify clear action items, decisions, and blockers from the discussion
+- Create a meaningful title based on the meeting topic
 
 Output JSON fields:
 {{
@@ -25,7 +33,6 @@ Output JSON fields:
       {{'description': '...'}}
   ]
 }}
-
 
 Make sure JSON is valid.
 The 'title' key should contain a string.
