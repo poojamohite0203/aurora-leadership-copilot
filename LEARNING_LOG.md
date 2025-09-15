@@ -67,4 +67,8 @@
             'name': 'Alice',
             'email': 'alice@' # Invalid email format
         }
-- 
+- SQLLite : "SQLite is plug and play in Python" is accurate because the sqlite3 module is built-in to Python's standard library. This means you don't need to install any external packages or set up a separate server to start working with a database.There are 2 options to save data in-memory as well as a FIle - opted as File to have data even after app restarts.
+     ### Code Snippets / Commands
+        To initialize DB once 
+        ```sh
+        python -m src.db
