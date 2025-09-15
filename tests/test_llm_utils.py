@@ -48,3 +48,44 @@ def test_extract_meeting_insights_empty():
         assert isinstance(result["action_items"], list)
         assert isinstance(result["decisions"], list)
         assert isinstance(result["blockers"], list)
+
+
+def test_extract_clip_insights_basic():
+    text = (
+        "Discussed new feature. Alice will create a prototype. Bob raised a deployment issue."
+    )
+    result = extract_insights_from_text(text, prompt_templates.CLIP_EXTRACTION_PROMPT)
+    print("LLM Response (Clip):", result)
+    if isinstance(result, dict) and "summary" in result:
+        assert "summary" in result
+        assert "action_items" in result
+        assert "decisions" in result
+        assert "blockers" in result
+        assert isinstance(result["action_items"], list)
+        assert isinstance(result["decisions"], list)
+        assert isinstance(result["blockers"], list)
+    else:
+        assert "raw_output" in result
+        assert isinstance(result["raw_output"], str)
+
+
+def test_extract_journal_insights_basic():
+    text = (
+        "Today I learned about API security. My strength was persistence. I need to improve my documentation."
+    )
+    result = extract_insights_from_text(text, prompt_templates.JOURNAL_EXTRACTION_PROMPT)
+    print("LLM Response (Journal):", result)
+    if isinstance(result, dict) and "summary" in result:
+        assert "summary" in result
+        assert "theme" in result
+        assert "strength" in result
+        assert "growth_area" in result
+        assert "action_items" in result
+        assert "decisions" in result
+        assert "blockers" in result
+        assert isinstance(result["action_items"], list)
+        assert isinstance(result["decisions"], list)
+        assert isinstance(result["blockers"], list)
+    else:
+        assert "raw_output" in result
+        assert isinstance(result["raw_output"], str)

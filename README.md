@@ -48,6 +48,19 @@ ollama run llama3.1 "Hello"
 python -m pytest
 OR
 python3 -m pytest --capture=no # to display print on terminal from test cases
+python3 -m pytest --capture=no --disable-warnings # to disable warnings
+
+### Run the application
+#Activate your virtual environment (if not already):
+source .venv/bin/activate
+    #Install requirements:
+        pip install -r requirements.txt
+    #Run your FastAPI app from your project root:
+        uvicorn main:app --reload --app-dir src
+
+
+
+
 
 
 

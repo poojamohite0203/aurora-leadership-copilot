@@ -4,8 +4,9 @@ from datetime import datetime
 from typing import Optional
 
 from db.database import get_db
-from core import models, prompt_templates
-from core.llm_utils import extract_insights_from_text
+from core import prompt_templates
+from db import models
+from core import extract_insights_from_text
 
 router = APIRouter()
 

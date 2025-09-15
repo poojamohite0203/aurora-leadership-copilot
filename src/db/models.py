@@ -2,14 +2,15 @@ from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, E
 from sqlalchemy.orm import relationship
 from db.database import Base
 import enum
-
+from typing import Optional
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Enum, ARRAY
 class SourceEnum(str, enum.Enum):
     MEETING = "meeting"
     JOURNAL = "journal"
     CLIP = "clip"
 
 class Meeting(Base):
-    __tablename__ = "meetings"
+    __tablename__ = "meeting"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
     date = Column(DateTime)
@@ -21,7 +22,7 @@ class Meeting(Base):
     blockers = relationship("Blocker", back_populates="meeting")
 
 class Journal(Base):
-    __tablename__ = "journals"
+    __tablename__ = "journal"
     id = Column(Integer, primary_key=True, index=True)
     text = Column(String)
     summary = Column(String)
@@ -31,7 +32,7 @@ class Journal(Base):
     growth_area = Column(String)  # could be JSON/array later
 
 class Clip(Base):
-    __tablename__ = "clips"
+    __tablename__ = "clip"
     id = Column(Integer, primary_key=True, index=True)
     text = Column(String)
     summary = Column(String)
@@ -57,10 +58,10 @@ class Decision(Base):
     id = Column(Integer, primary_key=True, index=True)
     meeting_id = Column(Integer, ForeignKey("meeting.id"), nullable=True)
     description = Column(String)
-    other_options = Column(ARRAY(String), nullable=True)
+    other_options = Column(JSON, nullable=True)
     personal = Column(Boolean, default=False)
-    source: Optional[str] = Column(String, nullable=True)
-    source_id: Optional[int] = Column(Integer, nullable=True)
+    source = Column(String, nullable=True)
+    source_id = Column(Integer, nullable=True)
 
     meeting = relationship("Meeting", back_populates="decisions")
 
@@ -71,7 +72,7 @@ class Blocker(Base):
     meeting_id = Column(Integer, ForeignKey("meeting.id"), nullable=True)
     description = Column(String)
     personal = Column(Boolean, default=False)
-    source: Optional[str] = Column(String, nullable=True)
-    source_id: Optional[int] = Column(Integer, nullable=True)
+    source = Column(String, nullable=True)
+    source_id = Column(Integer, nullable=True)
 
     meeting = relationship("Meeting", back_populates="blockers")

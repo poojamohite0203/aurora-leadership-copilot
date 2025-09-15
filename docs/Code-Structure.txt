@@ -45,9 +45,9 @@ aurora-ai-copilot/
 │   └── dashboard/
 │       ├── streamlit_app.py    # Main dashboard entry point
 │       └── components/
-│           ├── meetings_ui.py
-│           ├── reports_ui.py
-│           ├── decisions_ui.py
+│           ├── meeting_ui.py
+│           ├── clips_ui.py
+│           ├── decision_ui.py
 │           └── journal_ui.py
 │
 ├── tests/

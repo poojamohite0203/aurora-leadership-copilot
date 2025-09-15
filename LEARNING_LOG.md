@@ -72,3 +72,7 @@
         To initialize DB once 
         ```sh
         python -m src.db
+- requirement.txt - similar to gradle - list of all necessary
+    ### Code Snippets / Commands
+        pip freeze > requirements.txt = cmd used to update requirement.txt when you manually install each from terminal
+- 
