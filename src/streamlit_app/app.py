@@ -1,7 +1,11 @@
 import streamlit as st
 from utils.api_client import get_meetings, get_clips, get_journals, get_action_items
+from sidebar import render_sidebar
 
 st.set_page_config(page_title="AI Productivity Dashboard", layout="wide")
+
+# Render the custom sidebar
+render_sidebar()
 
 st.title("📊 Productivity Dashboard")
 

@@ -1,8 +1,11 @@
 import streamlit as st
 from utils.api_client import get_weekly_reports
+from sidebar import render_sidebar
 
 st.set_page_config(page_title="Weekly Reports", layout="wide")
 st.title("📊 Weekly Status Reports")
+
+render_sidebar()
 
 reports = get_weekly_reports()
 

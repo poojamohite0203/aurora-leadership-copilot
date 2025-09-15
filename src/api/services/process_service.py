@@ -42,7 +42,7 @@ def extract_and_create_meeting(transcript: str, db: Session):
     #Index in Chroma (id must be string)
     add_to_index(
     id=f"meeting_{meeting.id}",
-    transcript=transcript,
+    text=transcript,
     metadata={"type": "meeting", "meeting_id": meeting.id})
 
     return {

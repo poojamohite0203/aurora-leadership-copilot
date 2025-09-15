@@ -1,5 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Depends, Query, Body
 from api.services.process_service import extract_and_create_journal
 from sqlalchemy.orm import Session
 from db import crud
@@ -7,9 +6,6 @@ from db.database import get_db
 from typing import Optional
 
 router = APIRouter(tags=["Journal"])
-
-class JournalInput(BaseModel):
-    text: str
 
 @router.get("")
 def get_all_journals(
@@ -27,13 +23,13 @@ def get_all_journals(
 
 
 @router.post("/extract")
-def extract_journal(input: JournalInput, db: Session = Depends(get_db)):
+def extract_journal(text: str = Body(..., media_type="text/plain"), db: Session = Depends(get_db)):
     """
-    Extract structured journal info from text,
-    save to DB, and return full journal data.
+    Extract structured journal info from raw text.
+    Just paste your text directly - no JSON formatting needed!
     """
     try:
-        journal_info = extract_and_create_journal(input.text, db)
+        journal_info = extract_and_create_journal(text, db)
         return journal_info
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

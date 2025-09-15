@@ -1,9 +1,37 @@
 import streamlit as st
-from utils.api_client import get_meetings, get_meeting_details
+from utils.api_client import get_meetings, get_meeting_details, extract_meeting
+from sidebar import render_sidebar
 
 st.set_page_config(page_title="Meetings", layout="wide")
 
+# Render the custom sidebar
+render_sidebar()
+
 st.title("📅 Meetings")
+
+# Add new meeting section
+st.header("➕ Add New Meeting")
+with st.expander("Add Meeting Transcript", expanded=False):
+    transcript_text = st.text_area(
+        "Enter meeting transcript:",
+        placeholder="Paste your raw meeting transcript here (with timestamps, speaker names, etc.). The AI will automatically parse and extract insights.\n\nExample:\n'John Smith 9:30 AM: Let's discuss the API integration...\nJane Doe 9:32 AM: I think we should prioritize security...'",
+        height=250,
+        key="meeting_transcript"
+    )
+    
+    if st.button("Extract Meeting Data", key="extract_meeting"):
+        if transcript_text.strip():
+            with st.spinner("Processing meeting transcript..."):
+                result = extract_meeting(transcript_text)
+                if result:
+                    st.success(f"✅ Meeting extracted successfully! Meeting ID: {result.get('id', 'N/A')}")
+                    st.rerun()  # Refresh the page to show the new meeting
+                else:
+                    st.error("❌ Failed to extract meeting data. Please try again.")
+        else:
+            st.warning("Please enter a meeting transcript.")
+
+st.divider()
 
 # ---- Fetch meetings ----
 meetings = get_meetings()

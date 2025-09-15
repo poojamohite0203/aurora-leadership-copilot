@@ -209,3 +209,4 @@ __marimo__/
 # Database files
 aurora.db
 .chroma/
+.chroma/chroma.sqlite3
