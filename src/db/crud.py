@@ -176,3 +176,82 @@ def get_all_blockers(db: Session, limit: Optional[int] = None):
 def get_blocker_by_id(db: Session, blocker_id: int):
     """Get a specific blocker by ID"""
     return db.query(models.Blocker).filter(models.Blocker.id == blocker_id).first()
+
+
+# Status-aware CRUD functions
+def get_all_action_items_with_status(db: Session, include_archived: bool = False, limit: Optional[int] = None):
+    """Get action items filtered by status"""
+    query = db.query(models.Action_Item)
+    
+    if not include_archived:
+        # Only show open and in_progress items by default
+        query = query.filter(models.Action_Item.status.in_([models.ActionItemStatus.OPEN, models.ActionItemStatus.IN_PROGRESS]))
+    
+    query = query.order_by(models.Action_Item.id.desc())
+    
+    if limit:
+        query = query.limit(limit)
+    
+    return query.all()
+
+
+def get_all_decisions_with_status(db: Session, include_archived: bool = False, limit: Optional[int] = None):
+    """Get decisions filtered by status"""
+    query = db.query(models.Decision)
+    
+    if not include_archived:
+        # Only show open items by default
+        query = query.filter(models.Decision.status == models.DecisionStatus.OPEN)
+    
+    query = query.order_by(models.Decision.id.desc())
+    
+    if limit:
+        query = query.limit(limit)
+    
+    return query.all()
+
+
+def get_all_blockers_with_status(db: Session, include_archived: bool = False, limit: Optional[int] = None):
+    """Get blockers filtered by status"""
+    query = db.query(models.Blocker)
+    
+    if not include_archived:
+        # Only show open and in_progress items by default
+        query = query.filter(models.Blocker.status.in_([models.BlockerStatus.OPEN, models.BlockerStatus.IN_PROGRESS]))
+    
+    query = query.order_by(models.Blocker.id.desc())
+    
+    if limit:
+        query = query.limit(limit)
+    
+    return query.all()
+
+
+def update_action_item_status(db: Session, action_item_id: int, status: models.ActionItemStatus):
+    """Update action item status"""
+    action_item = db.query(models.Action_Item).filter(models.Action_Item.id == action_item_id).first()
+    if action_item:
+        action_item.status = status
+        db.commit()
+        db.refresh(action_item)
+    return action_item
+
+
+def update_decision_status(db: Session, decision_id: int, status: models.DecisionStatus):
+    """Update decision status"""
+    decision = db.query(models.Decision).filter(models.Decision.id == decision_id).first()
+    if decision:
+        decision.status = status
+        db.commit()
+        db.refresh(decision)
+    return decision
+
+
+def update_blocker_status(db: Session, blocker_id: int, status: models.BlockerStatus):
+    """Update blocker status"""
+    blocker = db.query(models.Blocker).filter(models.Blocker.id == blocker_id).first()
+    if blocker:
+        blocker.status = status
+        db.commit()
+        db.refresh(blocker)
+    return blocker

@@ -4,10 +4,30 @@ from db.database import Base
 import enum
 from typing import Optional
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Enum, ARRAY, JSON
+
 class SourceEnum(str, enum.Enum):
     MEETING = "meeting"
     JOURNAL = "journal"
     CLIP = "clip"
+
+class ActionItemStatus(str, enum.Enum):
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    DONE = "done"
+    IGNORED = "ignored"
+
+class BlockerStatus(str, enum.Enum):
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    RESOLVED = "resolved"
+    ESCALATED = "escalated"
+    IGNORED = "ignored"
+
+class DecisionStatus(str, enum.Enum):
+    OPEN = "open"
+    DECIDED = "decided"
+    IMPLEMENTED = "implemented"
+    CANCELLED = "cancelled"
 
 class Meeting(Base):
     __tablename__ = "meeting"
@@ -45,6 +65,7 @@ class Action_Item(Base):
     meeting_id = Column(Integer, ForeignKey("meeting.id"), nullable=True)
     description = Column(String)
     due_date = Column(DateTime, nullable=True)
+    status = Column(Enum(ActionItemStatus), default=ActionItemStatus.OPEN)
     
     personal = Column(Boolean, default=False)
     source: Optional[str] = Column(String, nullable=True)
@@ -59,6 +80,7 @@ class Decision(Base):
     meeting_id = Column(Integer, ForeignKey("meeting.id"), nullable=True)
     description = Column(String)
     other_options = Column(JSON, nullable=True)
+    status = Column(Enum(DecisionStatus), default=DecisionStatus.OPEN)
     personal = Column(Boolean, default=False)
     source = Column(String, nullable=True)
     source_id = Column(Integer, nullable=True)
@@ -71,6 +93,7 @@ class Blocker(Base):
     id = Column(Integer, primary_key=True, index=True)
     meeting_id = Column(Integer, ForeignKey("meeting.id"), nullable=True)
     description = Column(String)
+    status = Column(Enum(BlockerStatus), default=BlockerStatus.OPEN)
     personal = Column(Boolean, default=False)
     source = Column(String, nullable=True)
     source_id = Column(Integer, nullable=True)
