@@ -104,25 +104,46 @@ def extract_journal(text):
         return None
 
 # -------------------- Action Items --------------------
-def get_action_items():
-    resp = requests.get(f"{BASE_URL}/action_item")
+def get_action_items(include_archived: bool = False):
+    params = {"include_archived": include_archived}
+    resp = requests.get(f"{BASE_URL}/action_item", params=params)
     if resp.status_code == 200:
         return resp.json()
     return []
+
+def update_action_item_status(action_item_id: int, status: str):
+    resp = requests.put(f"{BASE_URL}/action_item/{action_item_id}/status", json={"status": status})
+    if resp.status_code == 200:
+        return resp.json()
+    return None
 
 # -------------------- Decisions --------------------
-def get_decisions():
-    resp = requests.get(f"{BASE_URL}/decision")
+def get_decisions(include_archived: bool = False):
+    params = {"include_archived": include_archived}
+    resp = requests.get(f"{BASE_URL}/decision", params=params)
     if resp.status_code == 200:
         return resp.json()
     return []
 
+def update_decision_status(decision_id: int, status: str):
+    resp = requests.put(f"{BASE_URL}/decision/{decision_id}/status", json={"status": status})
+    if resp.status_code == 200:
+        return resp.json()
+    return None
+
 # -------------------- Blockers --------------------
-def get_blockers():
-    resp = requests.get(f"{BASE_URL}/blocker")
+def get_blockers(include_archived: bool = False):
+    params = {"include_archived": include_archived}
+    resp = requests.get(f"{BASE_URL}/blocker", params=params)
     if resp.status_code == 200:
         return resp.json()
     return []
+
+def update_blocker_status(blocker_id: int, status: str):
+    resp = requests.put(f"{BASE_URL}/blocker/{blocker_id}/status", json={"status": status})
+    if resp.status_code == 200:
+        return resp.json()
+    return None
 
 # -------------------- Weekly Reports --------------------
 def get_weekly_reports():

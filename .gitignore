@@ -208,5 +208,10 @@ __marimo__/
 
 # Database files
 aurora.db
+
+# Chroma vector database files
 .chroma/
-.chroma/chroma.sqlite3
+.chroma/**
+*.chroma
+chroma.sqlite3
+chroma_data/

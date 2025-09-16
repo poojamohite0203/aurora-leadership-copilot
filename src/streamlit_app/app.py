@@ -13,7 +13,7 @@ st.title("📊 Productivity Dashboard")
 meetings = get_meetings()
 clips = get_clips()
 journals = get_journals()
-actions = get_action_items()
+actions = get_action_items(include_archived=False)  # Only active items for dashboard
 
 # ---- Summary Cards (4 columns) ----
 col1, col2, col3, col4 = st.columns(4)
@@ -23,8 +23,9 @@ with col1:
     st.page_link("pages/meetings.py", label="View Meetings")
 
 with col2:
-    pending_actions = [a for a in actions if not a.get("completed")]
-    st.metric("Open Action Items", len(pending_actions))
+    # Only count open and in_progress action items
+    active_actions = [a for a in actions if a.get("status") in ["open", "in_progress"]]
+    st.metric("Open Action Items", len(active_actions))
     st.page_link("pages/action_tracker.py", label="Action Tracker")
 
 with col3:
