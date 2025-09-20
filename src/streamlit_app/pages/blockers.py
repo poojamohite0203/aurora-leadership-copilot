@@ -10,11 +10,11 @@ st.title("⛔ Blockers")
 st.markdown("""
 <div style='background-color:#f0f2f6; color:#222; padding:10px; border-radius:8px; margin-bottom:16px;'>
 <b>How to use:</b><br>
-- <b>🔴 Open</b>: Not yet resolved<br>
-- <b>🟡 In Progress</b>: Being worked on<br>
+- <b>🟠 Open</b>: Not yet resolved<br>
+- <b>🟦 In Progress</b>: Being worked on<br>
 - <b>✅ Resolved</b>: Fixed<br>
 - <b>🚨 Escalated</b>: Needs urgent attention<br>
-- <b>⚫ Ignored</b>: No longer relevant<br><br>
+- <b>⚪ Ignored</b>: No longer relevant<br><br>
 Use the <b>Change Status</b> dropdown to update a blocker's status.<br>
 Toggle <b>Show Archived Blockers</b> to view resolved or ignored items.
 </div>
@@ -33,11 +33,11 @@ else:
         cols = st.columns([0.5, 4, 1.2, 2])
         status = blocker.get('status', 'open')
         status_colors = {
-            'open': '🔴',
-            'in_progress': '🟡',
+            'open': '🟠',
+            'in_progress': '🟦',
             'resolved': '✅',
             'escalated': '🚨',
-            'ignored': '⚫'
+            'ignored': '⚪'
         }
         status_icon = status_colors.get(status, '❓')
         with cols[0]:

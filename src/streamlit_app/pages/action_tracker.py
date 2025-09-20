@@ -10,10 +10,10 @@ st.title("✅ Action Items Tracker")
 st.markdown("""
 <div style='background-color:#f0f2f6; color:#222; padding:10px; border-radius:8px; margin-bottom:16px;'>
 <b>How to use:</b><br>
-- <b>🔴 Open</b>: Not started yet<br>
-- <b>🟡 In Progress</b>: Work is ongoing<br>
+- <b>🟠 Open</b>: Not started yet<br>
+- <b>🟦 In Progress</b>: Work is ongoing<br>
 - <b>✅ Done</b>: Completed<br>
-- <b>⚫ Ignored</b>: No longer relevant<br><br>
+- <b>⚪ Ignored</b>: No longer relevant<br><br>
 Use the <b>Change Status</b> dropdown to update an action item's status.<br>
 Toggle <b>Show Archived Items</b> to view completed or ignored items.
 </div>
@@ -32,10 +32,10 @@ else:
         cols = st.columns([0.5, 4, 1.2, 2])
         status = action.get('status', 'open')
         status_colors = {
-            'open': '🔴',
-            'in_progress': '🟡', 
+            'open': '🟠',  # subtle orange
+            'in_progress': '🟦',  # subtle blue
             'done': '✅',
-            'ignored': '⚫'
+            'ignored': '⚪'  # subtle white
         }
         status_icon = status_colors.get(status, '❓')
         with cols[0]:

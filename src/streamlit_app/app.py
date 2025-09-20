@@ -19,7 +19,7 @@ st.markdown("""
 - <b>Journals</b>: Reflect on your work and capture insights.<br>
 - <b>Weekly Status Report</b>: Get an AI-generated summary of your week.<br><br>
 <b>How to use:</b><br>
-- Click any card or link to view details and manage your work.<br>
+- Click any link to view details and manage your work.<br>
 - Use the sidebar to quickly navigate between sections.<br>
 </div>
 """, unsafe_allow_html=True)

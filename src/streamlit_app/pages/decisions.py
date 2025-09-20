@@ -10,10 +10,10 @@ st.title("🗳 Decisions")
 st.markdown("""
 <div style='background-color:#f0f2f6; color:#222; padding:10px; border-radius:8px; margin-bottom:16px;'>
 <b>How to use:</b><br>
-- <b>🔴 Open</b>: Not decided yet<br>
+- <b>🟠 Open</b>: Not decided yet<br>
 - <b>✅ Decided</b>: Decision made<br>
 - <b>🚀 Implemented</b>: Actioned<br>
-- <b>❌ Cancelled</b>: No longer pursued<br><br>
+- <b>⚪ Cancelled</b>: No longer pursued<br><br>
 Use the <b>Change Status</b> dropdown to update a decision's status.<br>
 Toggle <b>Show Archived Decisions</b> to view decided or cancelled items.
 </div>
@@ -32,10 +32,10 @@ else:
         cols = st.columns([0.5, 4, 1.2, 2])
         status = decision.get('status', 'open')
         status_colors = {
-            'open': '🔴',
+            'open': '🟠',
             'decided': '✅',
             'implemented': '🚀',
-            'cancelled': '❌'
+            'cancelled': '⚪'
         }
         status_icon = status_colors.get(status, '❓')
         with cols[0]:
