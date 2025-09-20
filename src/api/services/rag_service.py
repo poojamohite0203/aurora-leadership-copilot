@@ -3,6 +3,8 @@ from db.vector_store import search
 from core.llm_utils import query_ollama
 from db.vector_store import search
 
+
+# Enhance Propt - send it similary score - based on question and context answer this question - consider similarity score
 RAG_PROMPT = """
 You are an AI assistant. Use the context below to answer the question.
 If the answer is not in the context, say you don’t know.

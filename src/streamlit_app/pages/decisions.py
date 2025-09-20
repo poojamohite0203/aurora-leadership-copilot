@@ -1,10 +1,24 @@
 import streamlit as st
 from utils.api_client import get_decisions, update_decision_status
 from sidebar import render_sidebar
+import pandas as pd
 
 st.set_page_config(page_title="Decisions", layout="wide")
 render_sidebar()
 st.title("🗳 Decisions")
+
+# Quick legend for first-time users
+st.markdown("""
+<div style='background-color:#f0f2f6; color:#222; padding:10px; border-radius:8px; margin-bottom:16px;'>
+<b>How to use:</b><br>
+- <b>🟠 Open</b>: Not decided yet<br>
+- <b>✅ Decided</b>: Decision made<br>
+- <b>🚀 Implemented</b>: Actioned<br>
+- <b>⚪ Cancelled</b>: No longer pursued<br><br>
+Use the <b>Change Status</b> dropdown to update a decision's status.<br>
+Toggle <b>Show Archived Decisions</b> to view decided or cancelled items.
+</div>
+""", unsafe_allow_html=True)
 
 # Status filter toggle
 include_archived = st.toggle("Show Archived Decisions (decided/cancelled)", value=False)
@@ -15,37 +29,36 @@ decisions = get_decisions(include_archived=include_archived)
 if not decisions:
     st.info("No decisions found.")
 else:
+    status_colors = {
+        'open': '🟠',
+        'decided': '✅',
+        'implemented': '🚀',
+        'cancelled': '⚪'
+    }
+    # Table header
+    cols = st.columns([0.7, 4, 1.5, 2, 1])
+    headers = ["Status", "Description", "Current Status", "Change Status", "Update"]
+    for col, header in zip(cols, headers):
+        col.markdown(f"**{header}**")
+    # Table rows
     for decision in decisions:
+        status = decision.get('status', 'open')
         with st.container():
-            col1, col2, col3 = st.columns([3, 1, 1])
-            
-            with col1:
-                # Status badge
-                status = decision.get('status', 'open')
-                status_colors = {
-                    'open': '🔴',
-                    'decided': '✅',
-                    'implemented': '🚀',
-                    'cancelled': '❌'
-                }
-                status_icon = status_colors.get(status, '❓')
-                
-                st.write(f"{status_icon} **{decision['description']}**")
-                if decision.get('other_options'):
-                    st.caption(f"Options: {', '.join(decision['other_options'])}")
-            
-            with col2:
-                st.write(f"Status: {status.replace('_', ' ').title()}")
-            
-            with col3:
-                # Status update dropdown
+            cols = st.columns([0.7, 4, 1.5, 2, 1])
+            with cols[0]:
+                st.markdown(status_colors.get(status, '❓'))
+            with cols[1]:
+                st.markdown(decision['description'])
+            with cols[2]:
+                st.caption(status.replace('_', ' ').title())
+            with cols[3]:
                 new_status = st.selectbox(
-                    "Change Status",
+                    "",
                     options=['open', 'decided', 'implemented', 'cancelled'],
                     index=['open', 'decided', 'implemented', 'cancelled'].index(status),
                     key=f"status_{decision['id']}"
                 )
-                
+            with cols[4]:
                 if st.button("Update", key=f"update_{decision['id']}"):
                     if new_status != status:
                         result = update_decision_status(decision['id'], new_status)
@@ -54,5 +67,3 @@ else:
                             st.rerun()
                         else:
                             st.error("Failed to update status")
-            
-            st.divider()
