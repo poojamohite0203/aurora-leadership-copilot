@@ -264,11 +264,23 @@ def get_weekly_report(db, week_start, week_end):
     return db.query(models.WeeklyReport).filter_by(week_start=week_start, week_end=week_end).first()
 
 def create_weekly_report(db, week_start, week_end, summary):
-    report = models.WeeklyReport(week_start=week_start, week_end=week_end, summary=summary)
-    db.add(report)
-    db.commit()
-    db.refresh(report)
-    return report
+    existing_report = get_weekly_report(db, week_start, week_end)
+    if existing_report:
+        existing_report.summary = summary
+        existing_report.created_at = datetime.utcnow()
+        db.commit()
+        db.refresh(existing_report)
+        return existing_report
+    else:
+        report = models.WeeklyReport(
+            week_start=week_start,
+            week_end=week_end,
+            summary=summary
+        )
+        db.add(report)
+        db.commit()
+        db.refresh(report)
+        return report
 
 def list_weekly_reports(db):
     return db.query(models.WeeklyReport).order_by(models.WeeklyReport.week_start.desc()).all()

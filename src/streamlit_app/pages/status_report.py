@@ -43,7 +43,7 @@ if gen_btn:
     with st.spinner("Generating weekly report..."):
         # Ensure date is formatted as YYYY-MM-DD string
         date_str = selected_date.strftime("%Y-%m-%d")
-        result = generate_weekly_report(date_str)
+        result = generate_weekly_report(date_str, True)
     st.session_state['gen_loading'] = False
     if result.get("error"):
         st.error(f"Failed to generate report: {result['error']}")
