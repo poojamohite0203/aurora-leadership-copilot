@@ -81,8 +81,8 @@ def render_sidebar():
     </style>
     """, unsafe_allow_html=True)
     
-    # Sidebar title
-    st.sidebar.markdown('<div class="sidebar-brand">🦄 AURORA COPILOT</div>', unsafe_allow_html=True)
+    # Sidebar title (move Aurora AI Leadership Copilot to the very top, larger)
+    st.sidebar.markdown('<div class="sidebar-brand" style="font-size:1.7rem; margin-bottom:0.5rem;">🦄 Aurora AI Leadership Copilot</div>', unsafe_allow_html=True)
     
     # Navigation menu
     st.sidebar.markdown("### 📍 NAVIGATION")
@@ -107,8 +107,3 @@ def render_sidebar():
     for label, page in nav_options:
         if st.sidebar.button(label, key=f"nav_{page}", use_container_width=True):
             st.switch_page(page)
-    
-    # Add some footer info
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("**🚀 Aurora AI Leadership Copilot**")
-    st.sidebar.markdown("*Intelligent productivity insights*")

@@ -9,6 +9,16 @@ render_sidebar()
 
 st.title("📅 Meetings")
 
+# Quick legend for first-time users
+st.markdown("""
+<div style='background-color:#f0f2f6; color:#222; padding:10px; border-radius:8px; margin-bottom:16px;'>
+<b>How to use:</b><br>
+- Add new meetings using the form above.<br>
+- Select a meeting from the sidebar to view details.<br>
+- See extracted <b>Action Items</b>, <b>Blockers</b>, and <b>Decisions</b> for each meeting.<br>
+</div>
+""", unsafe_allow_html=True)
+
 # Add new meeting section
 st.header("➕ Add New Meeting")
 with st.expander("Add Meeting Transcript", expanded=False):

@@ -9,6 +9,21 @@ render_sidebar()
 
 st.title("📊 Productivity Dashboard")
 
+# Quick legend for first-time users
+st.markdown("""
+<div style='background-color:#f0f2f6; color:#222; padding:12px; border-radius:8px; margin-bottom:18px;'>
+<b>Welcome to your AI Productivity Dashboard!</b><br>
+- <b>Meetings</b>: Track and review all your meetings.<br>
+- <b>Action Items</b>: See what needs to be done and update progress.<br>
+- <b>Clips</b>: Store and search important notes or snippets.<br>
+- <b>Journals</b>: Reflect on your work and capture insights.<br>
+- <b>Weekly Status Report</b>: Get an AI-generated summary of your week.<br><br>
+<b>How to use:</b><br>
+- Click any card or link to view details and manage your work.<br>
+- Use the sidebar to quickly navigate between sections.<br>
+</div>
+""", unsafe_allow_html=True)
+
 # ---- Fetch data from backend ----
 meetings = get_meetings()
 clips = get_clips()

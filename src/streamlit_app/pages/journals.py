@@ -5,6 +5,16 @@ from sidebar import render_sidebar
 st.set_page_config(page_title="Journals", layout="wide")
 st.title("📔 Journals")
 
+# Quick legend for first-time users
+st.markdown("""
+<div style='background-color:#f0f2f6; color:#222; padding:10px; border-radius:8px; margin-bottom:16px;'>
+<b>How to use:</b><br>
+- Add new journal entries using the form above.<br>
+- View and select past journals from the sidebar.<br>
+- Explore extracted <b>Growth Areas</b>, <b>Strengths</b>, and <b>Themes</b> in each entry.<br>
+</div>
+""", unsafe_allow_html=True)
+
 # Render the custom sidebar
 render_sidebar()
 
