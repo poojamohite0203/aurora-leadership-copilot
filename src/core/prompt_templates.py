@@ -137,9 +137,11 @@ Instructions:
 - Write a concise, insightful summary for the week.
 - Highlight key accomplishments, unresolved issues, and important decisions.
 - Use bullet points or short paragraphs for clarity.
-- Return the output in strict JSON format with a "summary" field.
+- IMPORTANT: The output must be strict JSON with a single field "summary".
+- The value of "summary" must be a plain text string, not an object or nested JSON.
+- Do not include Markdown, explanations, or extra text outside the JSON.
 
-Output JSON format:
+Output JSON format (strict):
 {{
   "summary": "Your detailed weekly summary here"
 }}

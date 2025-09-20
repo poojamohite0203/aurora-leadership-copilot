@@ -8,6 +8,8 @@ from db.crud import create_action_items, create_decisions, create_blockers, get_
 from db.vector_store import add_to_index
 from sqlalchemy import and_
 from core.prompt_templates import WEEKLY_REPORT_PROMPT
+import json, re
+from core.llm_utils import query_ollama
 
 def extract_and_create_meeting(transcript: str, db: Session):
     """
@@ -159,169 +161,68 @@ def get_week_range(date):
 
 def generate_weekly_report(date, db: Session, force_regen=False):
     week_start, week_end = get_week_range(date)
+
     if not force_regen:
         report = get_weekly_report(db, week_start, week_end)
         if report:
             return report
-    # Fetch all data for the week
-    meetings = db.query(models.Meeting).filter(and_(models.Meeting.date >= week_start, models.Meeting.date <= week_end)).all()
-    clips = db.query(models.Clip).filter(and_(models.Clip.date >= week_start, models.Clip.date <= week_end)).all()
-    journals = db.query(models.Journal).filter(and_(models.Journal.date >= week_start, models.Journal.date <= week_end)).all()
-    action_items = db.query(models.Action_Item).filter(and_(models.Action_Item.due_date >= week_start, models.Action_Item.due_date <= week_end)).all()
-    decisions = db.query(models.Decision).filter(and_(models.Decision.date >= week_start, models.Decision.date <= week_end)).all()
-    blockers = db.query(models.Blocker).filter(and_(models.Blocker.date >= week_start, models.Blocker.date <= week_end)).all()
+
+    # 1. Gather weekly data
+    meetings_str = "\n".join([f"- {m.title}: {m.summary}" for m in db.query(models.Meeting).filter(
+        models.Meeting.date.between(week_start, week_end))]) or "No meetings this week"
+
+    clips_str = "\n".join([f"- {c.summary}" for c in db.query(models.Clip).filter(
+        models.Clip.date.between(week_start, week_end))]) or "No clips this week"
+
+    journals_str = "\n".join([f"- {j.summary}" for j in db.query(models.Journal).filter(
+        models.Journal.date.between(week_start, week_end))]) or "No journals this week"
+
+    action_items_str = "\n".join([f"- {ai.description} (Due: {ai.due_date})"
+        for ai in db.query(models.Action_Item).filter(
+            models.Action_Item.due_date.between(week_start, week_end))]) or "No action items this week"
+
+    decisions_str = "\n".join([f"- {d.description}" for d in db.query(models.Decision).filter(
+        models.Decision.date.between(week_start, week_end))]) or "No decisions this week"
+
+    blockers_str = "\n".join([f"- {b.description}" for b in db.query(models.Blocker).filter(
+        models.Blocker.date.between(week_start, week_end))]) or "No blockers this week"
+
+    # 2. Build prompt
+    formatted_prompt = prompt_templates.WEEKLY_REPORT_PROMPT.format(
+        week_start=week_start.strftime('%Y-%m-%d'),
+        week_end=week_end.strftime('%Y-%m-%d'),
+        meetings=meetings_str,
+        clips=clips_str,
+        journals=journals_str,
+        action_items=action_items_str,
+        decisions=decisions_str,
+        blockers=blockers_str,
+    )
+
+    # 3. Query LLM
+    llm_response_text = query_ollama(formatted_prompt)
+    print("LLM Response: ", llm_response_text)
+    summary = extract_summary_from_response(llm_response_text)
+
+    # 4. Save to DB
+    report = create_weekly_report(db, week_start, week_end, summary)
+    return report
+
+def extract_summary_from_response(response: str) -> dict:
+    """
+    Extract the summary JSON string safely.
+    """
+    import re, json
     
-    # Extract insights with error handling
-    try:
-        # Debug: Check if the prompt formatting is the issue
-        try:
-            # Convert database objects to readable strings
-            meetings_str = "\n".join([f"- {m.title}: {m.summary}" for m in meetings]) if meetings else "No meetings this week"
-            clips_str = "\n".join([f"- {c.summary}" for c in clips]) if clips else "No clips this week"
-            journals_str = "\n".join([f"- {j.summary}" for j in journals]) if journals else "No journals this week"
-            action_items_str = "\n".join([f"- {ai.description} (Due: {ai.due_date})" for ai in action_items]) if action_items else "No action items this week"
-            decisions_str = "\n".join([f"- {d.description}" for d in decisions]) if decisions else "No decisions this week"
-            blockers_str = "\n".join([f"- {b.description}" for b in blockers]) if blockers else "No blockers this week"
-            
-            formatted_prompt = prompt_templates.WEEKLY_REPORT_PROMPT.format(
-                meetings=meetings_str,
-                clips=clips_str,
-                journals=journals_str,
-                action_items=action_items_str,
-                decisions=decisions_str,
-                blockers=blockers_str,
-                week_start=week_start.strftime('%Y-%m-%d'),
-                week_end=week_end.strftime('%Y-%m-%d')
-            )
-        except Exception as prompt_error:
-            raise Exception(f"Error formatting prompt: {str(prompt_error)}")
-        
-        # Debug: Check if LLM processing is the issue
-        try:
-            # For weekly reports, we already have the formatted prompt, so we need to call the LLM directly
-            from core.llm_utils import query_ollama
-            import json
-            import re
-            
-            llm_response_text = query_ollama(formatted_prompt)
-            
-            # Debug: Print the full LLM response to see what we're getting
-            print(f"Full LLM Response Length: {len(llm_response_text)}")
-            print(f"Full LLM Response: {llm_response_text}")
-            
-            # Parse the response like extract_insights_from_text does
-            try:
-                # First try fenced ```json blocks
-                match = re.search(r"```json\n(.*)\n```", llm_response_text, re.DOTALL)
-                if match:
-                    json_string = match.group(1)
-                    print(f"Found JSON block: {json_string}")
-                    # Try to parse JSON, but handle control characters
-                    try:
-                        llm_response = json.loads(json_string)
-                    except json.JSONDecodeError:
-                        # If JSON parsing fails due to control characters, extract text content directly
-                        print("JSON parsing failed, extracting text from JSON-like structure")
-                        # Try to extract the text content from the summary field
-                        text_match = re.search(r'"text":\s*"([^"]*(?:\\.[^"]*)*)"', json_string, re.DOTALL)
-                        if text_match:
-                            # Unescape the text content
-                            summary_text = text_match.group(1).replace('\\"', '"').replace('\\n', '\n')
-                            llm_response = {"summary": summary_text}
-                        else:
-                            # Fallback to raw text
-                            llm_response = {"summary": llm_response_text}
-                else:
-                    # Fallback: try any {} JSON block
-                    match = re.search(r"\{.*\}", llm_response_text, re.DOTALL)
-                    if match:
-                        json_string = match.group(0)
-                        print(f"Found JSON object: {json_string}")
-                        try:
-                            llm_response = json.loads(json_string)
-                        except json.JSONDecodeError:
-                            # Same fallback as above
-                            print("JSON parsing failed, extracting text from JSON-like structure")
-                            text_match = re.search(r'"text":\s*"([^"]*(?:\\.[^"]*)*)"', json_string, re.DOTALL)
-                            if text_match:
-                                summary_text = text_match.group(1).replace('\\"', '"').replace('\\n', '\n')
-                                llm_response = {"summary": summary_text}
-                            else:
-                                llm_response = {"summary": llm_response_text}
-                    else:
-                        # If no JSON, treat as raw output but use the full text as summary
-                        print("No JSON found, using raw text as summary")
-                        llm_response = {"summary": llm_response_text}
-            except json.JSONDecodeError as e:
-                print(f"JSON decode error: {e}")
-                # Use the raw response as summary instead of marking as raw_output
-                llm_response = {"summary": llm_response_text}
-                
-        except Exception as llm_error:
-            raise Exception(f"Error in LLM processing: {str(llm_error)}")
-        
-        # Check if LLM response is valid
-        if "raw_output" in llm_response:
-            # If we have raw_output, it means JSON parsing failed, but we can still use the content
-            summary = llm_response["raw_output"]
-        else:
-            # Handle different response structures
-            if "summary" in llm_response:
-                summary_data = llm_response["summary"]
-                if isinstance(summary_data, dict):
-                    # Check if it has a "text" field (new structure from LLM)
-                    if "text" in summary_data:
-                        summary = summary_data["text"]
-                    else:
-                        # Handle the structured format with key_achievements, etc.
-                        formatted_summary = f"Weekly report for {week_start.strftime('%Y-%m-%d')} to {week_end.strftime('%Y-%m-%d')}:\n\n"
-                        
-                        if "key_achievements" in summary_data and summary_data["key_achievements"]:
-                            formatted_summary += "**Key Achievements:**\n"
-                            for achievement in summary_data["key_achievements"]:
-                                formatted_summary += f"• {achievement}\n"
-                            formatted_summary += "\n"
-                        
-                        if "unresolved_issues" in summary_data and summary_data["unresolved_issues"]:
-                            formatted_summary += "**Unresolved Issues:**\n"
-                            for issue in summary_data["unresolved_issues"]:
-                                formatted_summary += f"• {issue}\n"
-                            formatted_summary += "\n"
-                        
-                        if "important_decisions" in summary_data and summary_data["important_decisions"]:
-                            formatted_summary += "**Important Decisions:**\n"
-                            for decision in summary_data["important_decisions"]:
-                                formatted_summary += f"• {decision}\n"
-                            formatted_summary += "\n"
-                        
-                        if not any([summary_data.get("key_achievements"), summary_data.get("unresolved_issues"), summary_data.get("important_decisions")]):
-                            formatted_summary += "No significant activities or decisions recorded for this week."
-                        
-                        summary = formatted_summary
-                elif isinstance(summary_data, str):
-                    # If summary is a simple string, use it directly
-                    summary = summary_data
-                else:
-                    # Fallback: convert whatever we have to string
-                    summary = str(summary_data)
-            else:
-                # Try to get summary from JSON response, fallback to full response if no summary field
-                summary = str(llm_response)
-        
-        # Debug: Check if database creation is the issue
-        try:
-            report = create_weekly_report(db, week_start, week_end, summary)
-        except Exception as db_error:
-            raise Exception(f"Error creating report in database: {str(db_error)}")
-            
-        if not report:
-            raise Exception("Failed to create weekly report in database - report is None")
-        return report
-    except Exception as e:
-        # Create a basic report if everything fails
-        summary = f"Weekly report for {week_start.strftime('%Y-%m-%d')} to {week_end.strftime('%Y-%m-%d')}:\n\nError generating report: {str(e)}"
-        try:
-            report = create_weekly_report(db, week_start, week_end, summary)
-            return report if report else None
-        except:
-            return None
+    # Try fenced code block first
+    match = re.search(r"```json\n(.*)\n```", response, re.DOTALL)
+    if match:
+        return json.loads(match.group(1))
+
+    # Try any JSON inside braces
+    match = re.search(r"\{.*\}", response, re.DOTALL)
+    if match:
+        return json.loads(match.group(0))
+
+    # If no JSON, wrap whole response
+    return {"summary": response.strip()}
