@@ -1,6 +1,8 @@
 import streamlit as st
 from utils.api_client import get_weekly_reports
+from utils.weekly_report_client import generate_weekly_report
 from sidebar import render_sidebar
+import datetime
 
 st.set_page_config(page_title="Weekly Reports", layout="wide")
 st.title("📊 Weekly Status Reports")
@@ -18,6 +20,36 @@ st.markdown("""
 render_sidebar()
 
 reports = get_weekly_reports()
+
+# --- Weekly Report Generation UI ---
+st.markdown("""
+<div style='background-color:#e6f7ff; color:#222; padding:10px; border-radius:8px; margin-bottom:16px;'>
+<b>Generate a new weekly report:</b><br>
+Select any date within the week you want to generate a report for. The system will summarize all meetings, action items, blockers, and decisions for that week.
+</div>
+""", unsafe_allow_html=True)
+
+col1, col2 = st.columns([2,1])
+def_date = datetime.date.today() - datetime.timedelta(days=datetime.date.today().weekday())
+with col1:
+    selected_date = st.date_input("Select a date in the week", value=def_date, max_value=datetime.date.today())
+with col2:
+    if 'gen_loading' not in st.session_state:
+        st.session_state['gen_loading'] = False
+    gen_btn = st.button("Generate Report", disabled=st.session_state['gen_loading'])
+
+if gen_btn:
+    st.session_state['gen_loading'] = True
+    with st.spinner("Generating weekly report..."):
+        result = generate_weekly_report(str(selected_date))
+    st.session_state['gen_loading'] = False
+    if result.get("error"):
+        st.error(f"Failed to generate report: {result['error']}")
+    elif result.get("summary"):
+        st.success("Report generated!")
+        st.experimental_rerun()
+    else:
+        st.warning("No new report generated (possibly already exists for this week).")
 
 if not reports:
     st.info("No reports generated yet.")

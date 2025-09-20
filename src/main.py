@@ -7,6 +7,7 @@ from api.routers import search
 from api.routers import action_item
 from api.routers import decision
 from api.routers import blocker
+from api.routers import weekly_report
 from db.database import engine
 from db import models
 
@@ -32,6 +33,8 @@ app.include_router(blocker.router, prefix="/blocker", tags=["Blockers"])
 app.include_router(search.router, prefix="", tags=["Search"])
 
 app.include_router(rag.router, prefix="", tags=["RAG"])
+
+app.include_router(weekly_report.router, prefix="", tags=["Weekly Report"])
 
 
 # create tables 

@@ -255,3 +255,17 @@ def update_blocker_status(db: Session, blocker_id: int, status: models.BlockerSt
         db.commit()
         db.refresh(blocker)
     return blocker
+
+
+def get_weekly_report(db, week_start, week_end):
+    return db.query(models.WeeklyReport).filter_by(week_start=week_start, week_end=week_end).first()
+
+def create_weekly_report(db, week_start, week_end, summary):
+    report = models.WeeklyReport(week_start=week_start, week_end=week_end, summary=summary)
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+    return report
+
+def list_weekly_reports(db):
+    return db.query(models.WeeklyReport).order_by(models.WeeklyReport.week_start.desc()).all()
