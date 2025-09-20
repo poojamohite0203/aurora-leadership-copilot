@@ -1,11 +1,15 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timedelta
 from core import prompt_templates
 from db import models
 from core import extract_insights_from_text
-from db.crud import create_action_items, create_decisions, create_blockers
+from db.crud import create_action_items, create_decisions, create_blockers, get_weekly_report, create_weekly_report, list_weekly_reports
 from db.vector_store import add_to_index
+from sqlalchemy import and_
+from core.prompt_templates import WEEKLY_REPORT_PROMPT
+import json, re
+from core.llm_utils import query_ollama
 
 def extract_and_create_meeting(transcript: str, db: Session):
     """
@@ -24,7 +28,7 @@ def extract_and_create_meeting(transcript: str, db: Session):
     meeting = models.Meeting(
         title=extracted.get("title", "Untitled Meeting"),
         date=datetime.utcnow(),
-        participants=extracted.get("participants", []),  # Keep as list - now stored as JSON
+        participants=extracted.get("participants", []),
         summary=extracted.get("summary", "")
     )
     db.add(meeting)
@@ -146,3 +150,89 @@ def extract_and_create_journal(text: str, db: Session):
         "strength": journal.strength,
         "growth_area": journal.growth_area
     }
+
+def get_week_range(date):
+    # Always return Monday-Sunday for the week containing 'date'
+    date = date.replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = date - timedelta(days=date.weekday())
+    week_end = week_start + timedelta(days=6)
+    return week_start, week_end
+
+
+def generate_weekly_report(date, db: Session, force_regen=False):
+    week_start, week_end = get_week_range(date)
+
+    if not force_regen:
+        report = get_weekly_report(db, week_start, week_end)
+        if report:
+            return report
+
+    # 1. Gather weekly data
+    meetings_str = "\n".join([f"- {m.title}: {m.summary}" for m in db.query(models.Meeting).filter(
+        models.Meeting.date.between(week_start, week_end))]) or "No meetings this week"
+
+    clips_str = "\n".join([f"- {c.summary}" for c in db.query(models.Clip).filter(
+        models.Clip.date.between(week_start, week_end))]) or "No clips this week"
+
+    journals_str = "\n".join([f"- {j.summary}" for j in db.query(models.Journal).filter(
+        models.Journal.date.between(week_start, week_end))]) or "No journals this week"
+
+    action_items_str = "\n".join([f"- {ai.description} (Due: {ai.due_date})"
+        for ai in db.query(models.Action_Item).filter(
+            models.Action_Item.due_date.between(week_start, week_end))]) or "No action items this week"
+
+    decisions_str = "\n".join([f"- {d.description}" for d in db.query(models.Decision).filter(
+        models.Decision.date.between(week_start, week_end))]) or "No decisions this week"
+
+    blockers_str = "\n".join([f"- {b.description}" for b in db.query(models.Blocker).filter(
+        models.Blocker.date.between(week_start, week_end))]) or "No blockers this week"
+
+    # 2. Build prompt
+    formatted_prompt = prompt_templates.WEEKLY_REPORT_PROMPT.format(
+        week_start=week_start.strftime('%Y-%m-%d'),
+        week_end=week_end.strftime('%Y-%m-%d'),
+        meetings=meetings_str,
+        clips=clips_str,
+        journals=journals_str,
+        action_items=action_items_str,
+        decisions=decisions_str,
+        blockers=blockers_str,
+    )
+
+    # 3. Query LLM
+    llm_response_text = query_ollama(formatted_prompt)
+    print("LLM Response: ", llm_response_text)
+
+    parsed = extract_summary_from_response(llm_response_text)
+
+    # If LLM returned {"summary": "..."} then grab just the string
+    if isinstance(parsed, dict) and "summary" in parsed:
+        summary_text = parsed["summary"]
+    else:
+        # fallback: store whole thing as string
+        summary_text = str(parsed)
+    print("Summary Text: ", summary_text)
+    
+    # Now insert plain text into DB
+    report = create_weekly_report(db, week_start, week_end, summary_text)
+
+    return report
+
+def extract_summary_from_response(response: str) -> dict:
+    """
+    Extract the summary JSON string safely.
+    """
+    import re, json
+    
+    # Try fenced code block first
+    match = re.search(r"```json\n(.*)\n```", response, re.DOTALL)
+    if match:
+        return json.loads(match.group(1))
+
+    # Try any JSON inside braces
+    match = re.search(r"\{.*\}", response, re.DOTALL)
+    if match:
+        return json.loads(match.group(0))
+
+    # If no JSON, wrap whole response
+    return {"summary": response.strip()}

@@ -72,7 +72,9 @@
 - requirement.txt - similar to gradle - list of all necessary
     ### Code Snippets / Commands
         pip freeze > requirements.txt = cmd used to update requirement.txt when you manually install each from terminal
-- 
+- To Delete Data from a table
+    ### Code Snippets / Commands
+        sqlite3 aurora.db "DELETE FROM weekly_report;"
 
 
 How to deploy ?

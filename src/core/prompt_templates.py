@@ -110,6 +110,43 @@ The 'decisions' key should contain a list of dictionaries, where each dictionary
 The 'blockers' key should contain a list of dictionaries, where each dictionary has a 'description' key.
 """
 
+WEEKLY_REPORT_PROMPT = """
+You are an AI assistant. Summarize the following week's meetings, clips, journals, action items, decisions, and blockers.
+
+Week: {week_start} to {week_end}
+
+Meetings:
+{meetings}
+
+Clips:
+{clips}
+
+Journals:
+{journals}
+
+Action Items:
+{action_items}
+
+Decisions:
+{decisions}
+
+Blockers:
+{blockers}
+
+Instructions:
+- Write a concise, insightful summary for the week.
+- Highlight key accomplishments, unresolved issues, and important decisions.
+- Use bullet points or short paragraphs for clarity.
+- IMPORTANT: The output must be strict JSON with a single field "summary".
+- The value of "summary" must be a plain text string, not an object or nested JSON.
+- Do not include Markdown, explanations, or extra text outside the JSON.
+
+Output JSON format (strict):
+{{
+  "summary": "Your detailed weekly summary here"
+}}
+"""
+
 def extract_insights_from_text(
     text: str, 
     prompt_template: str

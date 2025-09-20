@@ -1,6 +1,8 @@
-# src/routes/rag.py
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
+from db.database import get_db
 from api.services.rag_service import ask_question
+from datetime import datetime
 
 router = APIRouter(tags=["RAG"])
 

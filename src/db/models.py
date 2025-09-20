@@ -1,9 +1,9 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Enum, ARRAY, JSON, Text
 from sqlalchemy.orm import relationship
 from db.database import Base
 import enum
 from typing import Optional
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Enum, ARRAY, JSON
+from datetime import datetime
 
 class SourceEnum(str, enum.Enum):
     MEETING = "meeting"
@@ -65,6 +65,7 @@ class Action_Item(Base):
     meeting_id = Column(Integer, ForeignKey("meeting.id"), nullable=True)
     description = Column(String)
     due_date = Column(DateTime, nullable=True)
+    date = Column(DateTime)
     status = Column(Enum(ActionItemStatus), default=ActionItemStatus.OPEN)
     
     personal = Column(Boolean, default=False)
@@ -84,6 +85,7 @@ class Decision(Base):
     personal = Column(Boolean, default=False)
     source = Column(String, nullable=True)
     source_id = Column(Integer, nullable=True)
+    date = Column(DateTime)
 
     meeting = relationship("Meeting", back_populates="decisions")
 
@@ -97,5 +99,14 @@ class Blocker(Base):
     personal = Column(Boolean, default=False)
     source = Column(String, nullable=True)
     source_id = Column(Integer, nullable=True)
+    date = Column(DateTime)
 
     meeting = relationship("Meeting", back_populates="blockers")
+
+class WeeklyReport(Base):
+    __tablename__ = "weekly_report"
+    id = Column(Integer, primary_key=True, index=True)
+    week_start = Column(DateTime, index=True, nullable=False)
+    week_end = Column(DateTime, index=True, nullable=False)
+    summary = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
