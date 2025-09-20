@@ -12,6 +12,8 @@ def get_weekly_report_api(date: str = Query(..., description="Any date in the we
     try:
         date_obj = datetime.strptime(date, "%Y-%m-%d")
         report = generate_weekly_report(date_obj, db, force_regen=force_regen)
+        if not report:
+            return {"error": "No report found or generated for the given week."}
         return {
             "week_start": report.week_start.strftime("%Y-%m-%d"),
             "week_end": report.week_end.strftime("%Y-%m-%d"),
@@ -46,6 +48,8 @@ def post_weekly_report(
         force_regen = payload.get("force_regen", False)
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         report = generate_weekly_report(date_obj, db, force_regen=force_regen)
+        if not report:
+            return {"error": "No report found or generated for the given week."}
         return {
             "week_start": report.week_start.strftime("%Y-%m-%d"),
             "week_end": report.week_end.strftime("%Y-%m-%d"),

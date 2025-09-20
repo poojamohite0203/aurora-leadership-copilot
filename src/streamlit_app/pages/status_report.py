@@ -41,13 +41,15 @@ with col2:
 if gen_btn:
     st.session_state['gen_loading'] = True
     with st.spinner("Generating weekly report..."):
-        result = generate_weekly_report(str(selected_date))
+        # Ensure date is formatted as YYYY-MM-DD string
+        date_str = selected_date.strftime("%Y-%m-%d")
+        result = generate_weekly_report(date_str)
     st.session_state['gen_loading'] = False
     if result.get("error"):
         st.error(f"Failed to generate report: {result['error']}")
     elif result.get("summary"):
         st.success("Report generated!")
-        st.experimental_rerun()
+        st.rerun()
     else:
         st.warning("No new report generated (possibly already exists for this week).")
 

@@ -41,6 +41,7 @@ def create_action_items(db: Session, items: list, source: str, source_id: int, m
             source_id=source_id,
             description=item.get("description", ""),
             due_date=parse_due_date(item.get("due_date")),
+            date=parse_due_date(item.get("due_date")) or datetime.utcnow(),
             personal=personal
         )
         db.add(action_item)
@@ -54,7 +55,8 @@ def create_decisions(db: Session, items: list, source: str, source_id: int, meet
             source_id=source_id,
             description=item.get("description", ""),
             other_options=item.get("other_options", {}),
-            personal=personal
+            personal=personal,
+            date=datetime.utcnow()
         )
         db.add(decision)
 
@@ -66,7 +68,8 @@ def create_blockers(db: Session, items: list, source: str, source_id: int, meeti
             source=source,
             source_id=source_id,
             description=item.get("description", ""),
-            personal=personal
+            personal=personal,
+            date=datetime.utcnow()
         )
         db.add(blocker)
 

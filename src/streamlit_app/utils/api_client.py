@@ -147,7 +147,7 @@ def update_blocker_status(blocker_id: int, status: str):
 
 # -------------------- Weekly Reports --------------------
 def get_weekly_reports():
-    resp = requests.get(f"{BASE_URL}/weekly_report")
+    resp = requests.get(f"{BASE_URL}/weekly_report/list")
     if resp.status_code == 200:
         return resp.json()
     return []

@@ -99,6 +99,7 @@ class Blocker(Base):
     personal = Column(Boolean, default=False)
     source = Column(String, nullable=True)
     source_id = Column(Integer, nullable=True)
+    date = Column(DateTime)
 
     meeting = relationship("Meeting", back_populates="blockers")
 
