@@ -82,10 +82,7 @@ def render_sidebar():
     """, unsafe_allow_html=True)
     
     # Sidebar title (move Aurora AI Leadership Copilot to the very top, larger)
-    st.sidebar.markdown('<div class="sidebar-brand" style="font-size:1.7rem; margin-bottom:0.5rem;">🦄 Aurora AI Leadership Copilot</div>', unsafe_allow_html=True)
-    
-    # Navigation menu
-    st.sidebar.markdown("### 📍 NAVIGATION")
+    st.sidebar.markdown('<div class="sidebar-brand" style="font-size:1.2rem; margin-bottom:0.5rem;">Aurora AI Leadership Copilot</div>', unsafe_allow_html=True)
     
     # Dashboard link
     if st.sidebar.button("🏠 DASHBOARD", key="nav_dashboard", use_container_width=True):
