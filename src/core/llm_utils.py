@@ -11,3 +11,13 @@ def query_ollama(prompt: str, model: str = "llama3.1"):
 
 if __name__ == "__main__":
     print(query_ollama("Summarize: We discussed project X and Bob will write the docs. Alice flagged a blocker with API access."))
+
+
+def validate_llm_output(data: dict, required_fields: list) -> bool:
+    """
+    Ensure all required fields exist and are of correct type.
+    """
+    for field in required_fields:
+        if field not in data or not isinstance(data[field], str) or not data[field].strip():
+            return False
+    return True

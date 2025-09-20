@@ -9,7 +9,7 @@ from db.vector_store import add_to_index
 from sqlalchemy import and_
 from core.prompt_templates import WEEKLY_REPORT_PROMPT
 import json, re
-from core.llm_utils import query_ollama
+from core.llm_utils import query_ollama, validate_llm_output
 
 def extract_and_create_meeting(transcript: str, db: Session):
     """
@@ -24,6 +24,10 @@ def extract_and_create_meeting(transcript: str, db: Session):
 
     if "raw_output" in extracted:
         raise HTTPException(status_code=500, detail="LLM extraction failed")
+    
+    if not validate_llm_output(extracted, ["summary"]):
+        print("Failed to validate LLM output ", extracted)
+        raise HTTPException(status_code=500, detail="LLM output format invalid for meeting summary")
 
     meeting = models.Meeting(
         title=extracted.get("title", "Untitled Meeting"),
@@ -60,7 +64,6 @@ def extract_and_create_meeting(transcript: str, db: Session):
         "blockers": [b.__dict__ for b in db.query(models.Blocker).filter_by(meeting_id=meeting.id)]
     }
 
-
 def extract_and_create_clip(text: str, db: Session):
     """
     Extract ActionItems, Decisions, Blockers from a clip or chat text.
@@ -70,9 +73,13 @@ def extract_and_create_clip(text: str, db: Session):
         text=text,
         prompt_template=prompt_templates.CLIP_EXTRACTION_PROMPT
     )
-
+    
     if "raw_output" in extracted:
         raise HTTPException(status_code=500, detail="LLM extraction failed")
+
+    if not validate_llm_output(extracted, ["summary"]):
+        print("Failed to validate LLM output ", extracted)
+        raise HTTPException(status_code=500, detail="LLM output format invalid for clip summary")
 
     clip = models.Clip(
         text=text,
@@ -116,7 +123,11 @@ def extract_and_create_journal(text: str, db: Session):
 
     if "raw_output" in extracted:
         raise HTTPException(status_code=500, detail="LLM extraction failed")
-
+    
+    if not validate_llm_output(extracted, ["summary"]):
+        print("Failed to validate LLM output ", extracted)
+        raise HTTPException(status_code=500, detail="LLM output format invalid for journal summary") 
+       
     journal = models.Journal(
         text=text,
         summary=extracted.get("summary", ""),
@@ -157,7 +168,6 @@ def get_week_range(date):
     week_start = date - timedelta(days=date.weekday())
     week_end = week_start + timedelta(days=6)
     return week_start, week_end
-
 
 def generate_weekly_report(date, db: Session, force_regen=False):
     week_start, week_end = get_week_range(date)
@@ -201,8 +211,7 @@ def generate_weekly_report(date, db: Session, force_regen=False):
 
     # 3. Query LLM
     llm_response_text = query_ollama(formatted_prompt)
-    print("LLM Response: ", llm_response_text)
-
+    
     parsed = extract_summary_from_response(llm_response_text)
 
     # If LLM returned {"summary": "..."} then grab just the string
@@ -235,4 +244,4 @@ def extract_summary_from_response(response: str) -> dict:
         return json.loads(match.group(0))
 
     # If no JSON, wrap whole response
-    return {"summary": response.strip()}
+    return {"summary": "Summary generation failed: Output format invalid or empty."}

@@ -1,3 +1,4 @@
+from http.client import HTTPException
 import re
 from core.llm_utils import query_ollama
 import json
@@ -166,7 +167,6 @@ def extract_insights_from_text(
     # print("Prompt being sent to LLM:", prompt)
     response = query_ollama(prompt)
     # print("Raw LLM Response:", response)
-
     try:
         # First try fenced ```json blocks
         match = re.search(r"```json\n(.*)\n```", response, re.DOTALL)
