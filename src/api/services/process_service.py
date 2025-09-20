@@ -202,10 +202,20 @@ def generate_weekly_report(date, db: Session, force_regen=False):
     # 3. Query LLM
     llm_response_text = query_ollama(formatted_prompt)
     print("LLM Response: ", llm_response_text)
-    summary = extract_summary_from_response(llm_response_text)
 
-    # 4. Save to DB
-    report = create_weekly_report(db, week_start, week_end, summary)
+    parsed = extract_summary_from_response(llm_response_text)
+
+    # If LLM returned {"summary": "..."} then grab just the string
+    if isinstance(parsed, dict) and "summary" in parsed:
+        summary_text = parsed["summary"]
+    else:
+        # fallback: store whole thing as string
+        summary_text = str(parsed)
+    print("Summary Text: ", summary_text)
+    
+    # Now insert plain text into DB
+    report = create_weekly_report(db, week_start, week_end, summary_text)
+
     return report
 
 def extract_summary_from_response(response: str) -> dict:

@@ -32,7 +32,7 @@ def list_weekly_reports_api(db: Session = Depends(get_db)):
             "week_start": r.week_start.strftime("%Y-%m-%d"),
             "week_end": r.week_end.strftime("%Y-%m-%d"),
             "created_at": r.created_at,
-            "summary": r.summary[:100] + ("..." if len(r.summary) > 100 else "")
+            "summary": r.summary
         }
         for r in reports
     ]
