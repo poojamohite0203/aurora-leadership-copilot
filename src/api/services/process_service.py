@@ -205,32 +205,108 @@ def generate_weekly_report(date, db: Session, force_regen=False):
             
             llm_response_text = query_ollama(formatted_prompt)
             
+            # Debug: Print the full LLM response to see what we're getting
+            print(f"Full LLM Response Length: {len(llm_response_text)}")
+            print(f"Full LLM Response: {llm_response_text}")
+            
             # Parse the response like extract_insights_from_text does
             try:
                 # First try fenced ```json blocks
                 match = re.search(r"```json\n(.*)\n```", llm_response_text, re.DOTALL)
                 if match:
                     json_string = match.group(1)
-                    llm_response = json.loads(json_string)
+                    print(f"Found JSON block: {json_string}")
+                    # Try to parse JSON, but handle control characters
+                    try:
+                        llm_response = json.loads(json_string)
+                    except json.JSONDecodeError:
+                        # If JSON parsing fails due to control characters, extract text content directly
+                        print("JSON parsing failed, extracting text from JSON-like structure")
+                        # Try to extract the text content from the summary field
+                        text_match = re.search(r'"text":\s*"([^"]*(?:\\.[^"]*)*)"', json_string, re.DOTALL)
+                        if text_match:
+                            # Unescape the text content
+                            summary_text = text_match.group(1).replace('\\"', '"').replace('\\n', '\n')
+                            llm_response = {"summary": summary_text}
+                        else:
+                            # Fallback to raw text
+                            llm_response = {"summary": llm_response_text}
                 else:
                     # Fallback: try any {} JSON block
                     match = re.search(r"\{.*\}", llm_response_text, re.DOTALL)
                     if match:
-                        llm_response = json.loads(match.group(0))
+                        json_string = match.group(0)
+                        print(f"Found JSON object: {json_string}")
+                        try:
+                            llm_response = json.loads(json_string)
+                        except json.JSONDecodeError:
+                            # Same fallback as above
+                            print("JSON parsing failed, extracting text from JSON-like structure")
+                            text_match = re.search(r'"text":\s*"([^"]*(?:\\.[^"]*)*)"', json_string, re.DOTALL)
+                            if text_match:
+                                summary_text = text_match.group(1).replace('\\"', '"').replace('\\n', '\n')
+                                llm_response = {"summary": summary_text}
+                            else:
+                                llm_response = {"summary": llm_response_text}
                     else:
-                        # If no JSON, treat as raw output
-                        llm_response = {"raw_output": llm_response_text}
-            except json.JSONDecodeError:
-                llm_response = {"raw_output": llm_response_text}
+                        # If no JSON, treat as raw output but use the full text as summary
+                        print("No JSON found, using raw text as summary")
+                        llm_response = {"summary": llm_response_text}
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {e}")
+                # Use the raw response as summary instead of marking as raw_output
+                llm_response = {"summary": llm_response_text}
                 
         except Exception as llm_error:
             raise Exception(f"Error in LLM processing: {str(llm_error)}")
         
         # Check if LLM response is valid
         if "raw_output" in llm_response:
-            summary = f"Weekly report for {week_start.strftime('%Y-%m-%d')} to {week_end.strftime('%Y-%m-%d')}:\n\nNo structured data available for this week."
+            # If we have raw_output, it means JSON parsing failed, but we can still use the content
+            summary = llm_response["raw_output"]
         else:
-            summary = llm_response.get("summary", f"Weekly report for {week_start.strftime('%Y-%m-%d')} to {week_end.strftime('%Y-%m-%d')}:\n\nSummary not available.")
+            # Handle different response structures
+            if "summary" in llm_response:
+                summary_data = llm_response["summary"]
+                if isinstance(summary_data, dict):
+                    # Check if it has a "text" field (new structure from LLM)
+                    if "text" in summary_data:
+                        summary = summary_data["text"]
+                    else:
+                        # Handle the structured format with key_achievements, etc.
+                        formatted_summary = f"Weekly report for {week_start.strftime('%Y-%m-%d')} to {week_end.strftime('%Y-%m-%d')}:\n\n"
+                        
+                        if "key_achievements" in summary_data and summary_data["key_achievements"]:
+                            formatted_summary += "**Key Achievements:**\n"
+                            for achievement in summary_data["key_achievements"]:
+                                formatted_summary += f"• {achievement}\n"
+                            formatted_summary += "\n"
+                        
+                        if "unresolved_issues" in summary_data and summary_data["unresolved_issues"]:
+                            formatted_summary += "**Unresolved Issues:**\n"
+                            for issue in summary_data["unresolved_issues"]:
+                                formatted_summary += f"• {issue}\n"
+                            formatted_summary += "\n"
+                        
+                        if "important_decisions" in summary_data and summary_data["important_decisions"]:
+                            formatted_summary += "**Important Decisions:**\n"
+                            for decision in summary_data["important_decisions"]:
+                                formatted_summary += f"• {decision}\n"
+                            formatted_summary += "\n"
+                        
+                        if not any([summary_data.get("key_achievements"), summary_data.get("unresolved_issues"), summary_data.get("important_decisions")]):
+                            formatted_summary += "No significant activities or decisions recorded for this week."
+                        
+                        summary = formatted_summary
+                elif isinstance(summary_data, str):
+                    # If summary is a simple string, use it directly
+                    summary = summary_data
+                else:
+                    # Fallback: convert whatever we have to string
+                    summary = str(summary_data)
+            else:
+                # Try to get summary from JSON response, fallback to full response if no summary field
+                summary = str(llm_response)
         
         # Debug: Check if database creation is the issue
         try:
