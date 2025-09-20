@@ -30,7 +30,6 @@ blockers = get_blockers(include_archived=include_archived)
 if not blockers:
     st.info("No blockers found.")
 else:
-    table_data = []
     status_colors = {
         'open': '🟠',
         'in_progress': '🟦',
@@ -38,27 +37,35 @@ else:
         'escalated': '🚨',
         'ignored': '⚪'
     }
+    # Table header
+    cols = st.columns([0.7, 4, 1.5, 2, 1])
+    headers = ["Status", "Description", "Current Status", "Change Status", "Update"]
+    for col, header in zip(cols, headers):
+        col.markdown(f"**{header}**")
+    # Table rows
     for blocker in blockers:
-        table_data.append({
-            'Status': status_colors.get(blocker.get('status', 'open'), '❓'),
-            'Description': blocker['description'],
-            'Current Status': blocker.get('status', '').replace('_', ' ').title(),
-            'ID': blocker['id']
-        })
-    df = pd.DataFrame(table_data)
-    st.dataframe(df.drop(columns=['ID']), use_container_width=True)
-    for blocker in blockers:
-        new_status = st.selectbox(
-            f"Change Status for: {blocker['description'][:30]}",
-            options=['open', 'in_progress', 'resolved', 'escalated', 'ignored'],
-            index=['open', 'in_progress', 'resolved', 'escalated', 'ignored'].index(blocker.get('status', 'open')),
-            key=f"status_{blocker['id']}"
-        )
-        if st.button("Update", key=f"update_{blocker['id']}"):
-            if new_status != blocker.get('status', 'open'):
-                result = update_blocker_status(blocker['id'], new_status)
-                if result:
-                    st.success(f"Status updated to {new_status.replace('_', ' ').title()}")
-                    st.rerun()
-                else:
-                    st.error("Failed to update status")
+        status = blocker.get('status', 'open')
+        with st.container():
+            cols = st.columns([0.7, 4, 1.5, 2, 1])
+            with cols[0]:
+                st.markdown(status_colors.get(status, '❓'))
+            with cols[1]:
+                st.markdown(blocker['description'])
+            with cols[2]:
+                st.caption(status.replace('_', ' ').title())
+            with cols[3]:
+                new_status = st.selectbox(
+                    "",
+                    options=['open', 'in_progress', 'resolved', 'escalated', 'ignored'],
+                    index=['open', 'in_progress', 'resolved', 'escalated', 'ignored'].index(status),
+                    key=f"status_{blocker['id']}"
+                )
+            with cols[4]:
+                if st.button("Update", key=f"update_{blocker['id']}"):
+                    if new_status != status:
+                        result = update_blocker_status(blocker['id'], new_status)
+                        if result:
+                            st.success(f"Status updated to {new_status.replace('_', ' ').title()}")
+                            st.rerun()
+                        else:
+                            st.error("Failed to update status")

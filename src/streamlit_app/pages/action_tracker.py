@@ -29,37 +29,43 @@ actions = get_action_items(include_archived=include_archived)
 if not actions:
     st.info("No action items found.")
 else:
-    # Prepare table data
-    table_data = []
     status_colors = {
         'open': '🟠',
         'in_progress': '🟦',
         'done': '✅',
         'ignored': '⚪'
     }
+    # Table header
+    cols = st.columns([0.7, 4, 1.5, 2, 1])
+    headers = ["Status", "Description", "Current Status", "Change Status", "Update"]
+    for col, header in zip(cols, headers):
+        col.markdown(f"**{header}**")
+    # Table rows
     for action in actions:
-        table_data.append({
-            'Status': status_colors.get(action.get('status', 'open'), '❓'),
-            'Description': action['description'],
-            'Due Date': action.get('due_date', ''),
-            'Current Status': action.get('status', '').replace('_', ' ').title(),
-            'ID': action['id']
-        })
-    df = pd.DataFrame(table_data)
-    st.dataframe(df.drop(columns=['ID']), use_container_width=True)
-    # Status update controls
-    for action in actions:
-        new_status = st.selectbox(
-            f"Change Status for: {action['description'][:30]}",
-            options=['open', 'in_progress', 'done', 'ignored'],
-            index=['open', 'in_progress', 'done', 'ignored'].index(action.get('status', 'open')),
-            key=f"status_{action['id']}"
-        )
-        if st.button("Update", key=f"update_{action['id']}"):
-            if new_status != action.get('status', 'open'):
-                result = update_action_item_status(action['id'], new_status)
-                if result:
-                    st.success(f"Status updated to {new_status.replace('_', ' ').title()}")
-                    st.rerun()
-                else:
-                    st.error("Failed to update status")
+        status = action.get('status', 'open')
+        with st.container():
+            cols = st.columns([0.7, 4, 1.5, 2, 1])
+            with cols[0]:
+                st.markdown(status_colors.get(status, '❓'))
+            with cols[1]:
+                st.markdown(action['description'])
+                if action.get('due_date'):
+                    st.caption(f"Due: {action['due_date']}")
+            with cols[2]:
+                st.caption(status.replace('_', ' ').title())
+            with cols[3]:
+                new_status = st.selectbox(
+                    "",
+                    options=['open', 'in_progress', 'done', 'ignored'],
+                    index=['open', 'in_progress', 'done', 'ignored'].index(status),
+                    key=f"status_{action['id']}"
+                )
+            with cols[4]:
+                if st.button("Update", key=f"update_{action['id']}"):
+                    if new_status != status:
+                        result = update_action_item_status(action['id'], new_status)
+                        if result:
+                            st.success(f"Status updated to {new_status.replace('_', ' ').title()}")
+                            st.rerun()
+                        else:
+                            st.error("Failed to update status")
