@@ -20,7 +20,7 @@ def add_to_index(id: str, text: str, metadata: dict):
     )
 
 
-def search(query: str, k: int = 5):
+def search(query: str, k: int = 5): # Arrive at optimal Number -- Experiment part of guessing on the number -- similarity % -- Overanwer is good than under answer -- filter based on similarity score is great than 0 show it 
     """Search the vector DB using semantic similarity"""
     embedding = model.encode(query).tolist()
     results = collection.query(query_embeddings=[embedding], n_results=k)

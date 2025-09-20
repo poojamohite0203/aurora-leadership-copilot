@@ -2,23 +2,10 @@
 
 ## 📌 Overview
 Aurora is an AI-powered leadership copilot that helps Engineering Managers save time and communicate effectively.  
-In Week 1, we build the **core extraction pipeline**: taking raw meeting text (transcripts or notes) and converting it into structured outputs:  
+The **core extraction pipeline**: taking raw meeting text (transcripts or notes) and converting it into structured outputs:  
 - ✅ **Decisions**  
 - ✅ **Action Items**  
 - ✅ **Blockers**  
-
-This will form the foundation for later features like weekly reports, dashboards, and automated follow-ups.  
-
----
-### Project Structure 
-- src/core/ – Handles LLM calls, prompt templates, text/audio processing.
-- src/data_pipeline/ – Connects APIs, manages DB, embeddings.
-- src/features/ – Implements your main EM-focused functionality.
-- src/dashboard/ – Streamlit UI modularized per feature.
-- data/ – Keep all raw or temporary data separate from code.
-- tests/ – Write simple unit tests.
-- docs/ – Architecture diagrams.
-
 ---
 
 ## ⚙️ Setup Instructions
@@ -62,10 +49,10 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
 
 ## Run the Stream Lit UI
     # Will render on http://localhost:8501
-    streamlit run src/streamlit_app/app.py  
+    streamlit run src/streamlit_app/app.py
 
 ## API's
-    /vector/search
+    /search
         Purpose: Pure retrieval from the vector DB.
         What it does:
 
@@ -84,7 +71,7 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
         Transparent, fast, no LLM hallucinations.
 
         Great for debugging RAG or building dashboards (like smart clipboard history).
-    /rag/ask
+    /ask
         Purpose: RAG-style reasoning and synthesis.
 
         What it does:
@@ -178,7 +165,7 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
         /ask → AI-generated insights & summaries.
 
 [📄 View the Flow in PFD ](./docs/system_flow_diagram.pdf)
-![Alt text for accessibility](docs/system_flow_diagram.png)
+<img src="docs/system_flow_diagram.png" alt="Alt text for accessibility" width="400"/>
 
 ### UI Flow
 

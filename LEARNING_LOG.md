@@ -1,9 +1,6 @@
 # Project Learning Log
 
-### What I Worked On
-- Creating Repo and Base Project Structure.
-
-### What I Learned
+### Topics
 - A Python virtual environment (venv) is an isolated, self-contained directory that holds a specific Python interpreter and its own set of installed packages for a project. Using a venv prevents conflicts between different projects that require conflicting versions of the same package. (very similar to external libraries from spring)
     ### Code Snippets / Commands
     ```python
@@ -76,3 +73,10 @@
     ### Code Snippets / Commands
         pip freeze > requirements.txt = cmd used to update requirement.txt when you manually install each from terminal
 - 
+
+
+How to deploy ?
+Models to hugging face - Explore 
+Docker to any precompute service - 
+
+change the url - 
