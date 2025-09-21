@@ -9,7 +9,7 @@ from db.vector_store import add_to_index
 from sqlalchemy import and_
 from core.prompt_templates import WEEKLY_REPORT_PROMPT
 import json, re
-from core.llm_utils import query_ollama, validate_llm_output
+from core.llm_utils import query_ollama, validate_llm_summary_output
 
 def extract_and_create_meeting(transcript: str, db: Session):
     """
@@ -21,19 +21,17 @@ def extract_and_create_meeting(transcript: str, db: Session):
         text=transcript,
         prompt_template=prompt_templates.MEETING_EXTRACTION_PROMPT
     )
-
-    if "raw_output" in extracted:
-        raise HTTPException(status_code=500, detail="LLM extraction failed")
-    
-    if not validate_llm_output(extracted, ["summary"]):
-        print("Failed to validate LLM output ", extracted)
-        raise HTTPException(status_code=500, detail="LLM output format invalid for meeting summary")
+    try:
+        summary = validate_llm_summary_output(extracted, ["summary"], context="meeting summary")
+    except ValueError as e:
+        print(str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
     meeting = models.Meeting(
         title=extracted.get("title", "Untitled Meeting"),
         date=datetime.utcnow(),
         participants=extracted.get("participants", []),
-        summary=extracted.get("summary", "")
+        summary=summary
     )
     db.add(meeting)
     db.commit()
@@ -73,17 +71,15 @@ def extract_and_create_clip(text: str, db: Session):
         text=text,
         prompt_template=prompt_templates.CLIP_EXTRACTION_PROMPT
     )
-    
-    if "raw_output" in extracted:
-        raise HTTPException(status_code=500, detail="LLM extraction failed")
-
-    if not validate_llm_output(extracted, ["summary"]):
-        print("Failed to validate LLM output ", extracted)
-        raise HTTPException(status_code=500, detail="LLM output format invalid for clip summary")
+    try:
+        summary = validate_llm_summary_output(extracted, ["summary"], context="clip summary")
+    except ValueError as e:
+        print(str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
     clip = models.Clip(
         text=text,
-        summary=extracted.get("summary", ""),
+        summary=summary,
         date=datetime.utcnow()
     )
     db.add(clip)
@@ -120,17 +116,15 @@ def extract_and_create_journal(text: str, db: Session):
         text=text,
         prompt_template=prompt_templates.JOURNAL_EXTRACTION_PROMPT
     )
+    try:
+        summary = validate_llm_summary_output(extracted, ["summary"], context="journal summary")
+    except ValueError as e:
+        print(str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
-    if "raw_output" in extracted:
-        raise HTTPException(status_code=500, detail="LLM extraction failed")
-    
-    if not validate_llm_output(extracted, ["summary"]):
-        print("Failed to validate LLM output ", extracted)
-        raise HTTPException(status_code=500, detail="LLM output format invalid for journal summary") 
-       
     journal = models.Journal(
         text=text,
-        summary=extracted.get("summary", ""),
+        summary=summary,
         date=datetime.utcnow(),
         theme=extracted.get("theme", []),
         strength=extracted.get("strength", []),
@@ -211,18 +205,19 @@ def generate_weekly_report(date, db: Session, force_regen=False):
 
     # 3. Query LLM
     llm_response_text = query_ollama(formatted_prompt)
-    
     parsed = extract_summary_from_response(llm_response_text)
-
-    # If LLM returned {"summary": "..."} then grab just the string
     if isinstance(parsed, dict) and "summary" in parsed:
         summary_text = parsed["summary"]
     else:
-        # fallback: store whole thing as string
         summary_text = str(parsed)
     print("Summary Text: ", summary_text)
-    
-    # Now insert plain text into DB
+    # Use guardrail for weekly summary
+    try:
+        summary_text = validate_llm_summary_output({"summary": summary_text}, ["summary"], context="weekly summary")
+    except ValueError as e:
+        print(str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
     report = create_weekly_report(db, week_start, week_end, summary_text)
 
     return report
