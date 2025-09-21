@@ -1,6 +1,6 @@
 # src/services/rag_service.py
 from db.vector_store import search
-from core.llm_utils import query_ollama
+from core.llm_utils import query_ollama, check_moderation, validate_llm_summary_output, sanitize_llm_input_output
 from db.vector_store import search
 
 
@@ -19,6 +19,16 @@ Answer:
 """
 
 def ask_question(question: str, k: int = 5):
+
+    # Sanitize user input before prompt injection
+    sanitized_text = sanitize_llm_input_output(str)
+
+     # Moderate Input
+    ok, categories = check_moderation(str)
+    if not ok:
+        print(f"User input blocked due to: {categories}")
+        raise ValueError(f"User input blocked due to: {categories}")
+    
     # 1. Search vector DB
     results = search(question, k)
 
@@ -35,6 +45,9 @@ def ask_question(question: str, k: int = 5):
     # 3. Send prompt to Ollama
     prompt = RAG_PROMPT.format(context=context, question=question)
     response = query_ollama(prompt)
+
+    #Validate LLM output
+    validate_llm_summary_output(response, ["answer"], context="RAG answer")
 
     return {
         "question": question,

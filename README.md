@@ -41,6 +41,8 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
         source .venv/bin/activate
     #Install requirements:
         pip install -r requirements.txt
+    #Add the open API key to .env file
+        OPENAI_API_KEY=your-api-key # if the file doesn't exists please add it under main project same level as data directory
     #Run your FastAPI app from your project root:
         uvicorn main:app --reload --app-dir src
 

@@ -2,6 +2,7 @@ import subprocess
 import json
 from openai import OpenAI
 import os
+from dotenv import load_dotenv
 
 def query_ollama(prompt: str, model: str = "llama3.1"):
     result = subprocess.run(
@@ -10,9 +11,6 @@ def query_ollama(prompt: str, model: str = "llama3.1"):
         capture_output=True
     )
     return result.stdout.decode("utf-8")
-
-if __name__ == "__main__":
-    print(query_olloma("Summarize: We discussed project X and Bob will write the docs. Alice flagged a blocker with API access."))
 
 
 def validate_llm_output(data: dict, required_fields: list) -> bool:
@@ -71,16 +69,28 @@ def validate_llm_summary_output(
     Returns the summary string if valid, else raises ValueError with a specific message.
     """
     if "raw_output" in extracted:
+        print(f"LLM extraction failed for {context}")
         raise ValueError(f"LLM extraction failed for {context}")
     if not validate_llm_output(extracted, required_fields):
+        print(f"LLM output format invalid for {context}")
         raise ValueError(f"LLM output format invalid for {context}")
+    
     summary = extracted.get("summary", "")
+
     if not is_content_length_valid(summary):
+        print(f"LLM output content invalid for {context}")
         raise ValueError(f"LLM output content invalid for {context}")
     if not is_content_safe(summary):
+        print(f"LLM output flagged as unsafe for {context}")
         raise ValueError(f"LLM output flagged as unsafe for {context}")
     if not detect_hallucination(summary, context):
+        print(f"LLM output may contain hallucinated facts for {context}")
         raise ValueError(f"LLM output may contain hallucinated facts for {context}")
+    ok, categories = check_moderation(summary)
+    if not ok:
+         print(f"LLM output blocked due to: {categories}")
+         raise ValueError(f"LLM output blocked due to: {categories}")
+        
     return sanitize_llm_input_output(summary)
 
 def sanitize_llm_input_output(text: str) -> str:
@@ -102,9 +112,10 @@ def detect_hallucination(output: str, context: str) -> bool:
     # TODO: Implement entity matching or more advanced checks
     return True
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 def check_moderation(text: str):
+    load_dotenv()
+    import os
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     response = client.moderations.create(
         model="omni-moderation-latest",
         input=text
@@ -113,8 +124,3 @@ def check_moderation(text: str):
     if results.flagged:
         return False, results.categories
     return True, None
-
-# Usage
-ok, categories = check_moderation("Kill all men")
-if not ok:
-    print("Blocked due to:", categories)

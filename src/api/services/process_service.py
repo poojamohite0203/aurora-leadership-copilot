@@ -9,7 +9,7 @@ from db.vector_store import add_to_index
 from sqlalchemy import and_
 from core.prompt_templates import WEEKLY_REPORT_PROMPT
 import json, re
-from core.llm_utils import query_ollama, validate_llm_summary_output
+from core.llm_utils import query_ollama, validate_llm_summary_output, check_moderation
 
 def extract_and_create_meeting(transcript: str, db: Session):
     """
@@ -17,10 +17,18 @@ def extract_and_create_meeting(transcript: str, db: Session):
     Saves Meeting, ActionItems, Decisions, Blockers into DB.
     Returns the full Meeting object with extracted fields.
     """
+
+    # Moderate Input
+    ok, categories = check_moderation(transcript)
+    if not ok:
+        print(f"User input blocked due to: {categories}")
+        raise ValueError(f"User input blocked due to: {categories}")
+    
     extracted = extract_insights_from_text(
         text=transcript,
         prompt_template=prompt_templates.MEETING_EXTRACTION_PROMPT
     )
+    
     try:
         summary = validate_llm_summary_output(extracted, ["summary"], context="meeting summary")
     except ValueError as e:
@@ -67,6 +75,12 @@ def extract_and_create_clip(text: str, db: Session):
     Extract ActionItems, Decisions, Blockers from a clip or chat text.
     Saves to DB as Clip and related tables.
     """
+    # Moderate Input
+    ok, categories = check_moderation(text)
+    if not ok:
+        print(f"User input blocked due to: {categories}")
+        raise ValueError(f"User input blocked due to: {categories}")
+    
     extracted = extract_insights_from_text(
         text=text,
         prompt_template=prompt_templates.CLIP_EXTRACTION_PROMPT
@@ -112,6 +126,12 @@ def extract_and_create_journal(text: str, db: Session):
     Saves Journal entry and associated ActionItems, Decisions, Blockers.
     Personal flag is True for all extracted items.
     """
+    # Moderate Input
+    ok, categories = check_moderation(text)
+    if not ok:
+        print(f"User input blocked due to: {categories}")
+        raise ValueError(f"User input blocked due to: {categories}")
+    
     extracted = extract_insights_from_text(
         text=text,
         prompt_template=prompt_templates.JOURNAL_EXTRACTION_PROMPT
