@@ -1,0 +1,2 @@
+Just spoke with DevOps — the API deployment failed again due to timeout.  
+We need to escalate this. I’ll create a Jira ticket.

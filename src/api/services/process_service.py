@@ -194,20 +194,20 @@ def generate_weekly_report(date, db: Session, force_regen=False):
     # 1. Gather weekly data
     meetings_str = "\n".join([f"- {m.title}: {m.summary}" for m in db.query(models.Meeting).filter(
         models.Meeting.date.between(week_start, week_end))]) or "No meetings this week"
-
-    clips_str = "\n".join([f"- {c.summary}" for c in db.query(models.Clip).filter(
+    
+    clips_str = "\n".join([f"- {c.text}" for c in db.query(models.Clip).filter(
         models.Clip.date.between(week_start, week_end))]) or "No clips this week"
-
-    journals_str = "\n".join([f"- {j.summary}" for j in db.query(models.Journal).filter(
+    
+    journals_str = "\n".join([f"- {j.text}" for j in db.query(models.Journal).filter(
         models.Journal.date.between(week_start, week_end))]) or "No journals this week"
-
+    
     action_items_str = "\n".join([f"- {ai.description} (Due: {ai.due_date})"
         for ai in db.query(models.Action_Item).filter(
-            models.Action_Item.due_date.between(week_start, week_end))]) or "No action items this week"
-
+            models.Action_Item.date.between(week_start, week_end))]) or "No action items this week"
+    
     decisions_str = "\n".join([f"- {d.description}" for d in db.query(models.Decision).filter(
         models.Decision.date.between(week_start, week_end))]) or "No decisions this week"
-
+    
     blockers_str = "\n".join([f"- {b.description}" for b in db.query(models.Blocker).filter(
         models.Blocker.date.between(week_start, week_end))]) or "No blockers this week"
 
@@ -222,10 +222,14 @@ def generate_weekly_report(date, db: Session, force_regen=False):
         decisions=decisions_str,
         blockers=blockers_str,
     )
+    print("Formatted Prompt: ", formatted_prompt)
 
     # 3. Query LLM
     llm_response_text = query_ollama(formatted_prompt)
+    print("LLM Response Text: ", llm_response_text)
+
     parsed = extract_summary_from_response(llm_response_text)
+
     if isinstance(parsed, dict) and "summary" in parsed:
         summary_text = parsed["summary"]
     else:

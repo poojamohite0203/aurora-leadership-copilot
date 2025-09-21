@@ -1,0 +1,22 @@
+[09:05 AM] Sarah: Good morning everyone. Today we need to finalize the migration plan for the OrderProcessing system.  
+
+[09:06 AM] John: Morning. I think we agreed last week to use the Strangler Fig pattern, starting with the Inventory service.  
+
+[09:07 AM] Emily: Yes, and I recommend we use Spring Boot for the services and Docker for containerization.  
+
+[09:08 AM] Mark: But we also need to decide on logging. I propose a centralized logging solution, maybe ELK stack.  
+
+[09:09 AM] David: Agreed. Also, our current build time is painful. Extracting smaller services will definitely help.  
+
+[09:11 AM] Sarah: Let’s make some concrete action items.  
+- John, can you create a GitHub repo for Inventory service and start extraction?  
+- Emily, please draft API requirements and data contracts.  
+- Mark, build the initial GitHub Actions workflow with Docker build & deploy.  
+
+[09:15 AM] John: Sure, I’ll get started today.  
+
+[09:16 AM] Emily: I can share the API draft by tomorrow.  
+
+[09:17 AM] Mark: Workflow setup by end of week.  
+
+[09:18 AM] Sarah: Perfect. Let’s aim for a status check next Monday. Meeting adjourned.  
