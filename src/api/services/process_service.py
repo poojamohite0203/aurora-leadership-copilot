@@ -238,10 +238,11 @@ def generate_weekly_report(date, db: Session, force_regen=False):
 
     parsed = extract_summary_from_response(llm_response_text)
 
-    if isinstance(parsed, dict) and "summary" in parsed:
-        summary_text = parsed["summary"]
-    else:
-        summary_text = str(parsed)
+    try:
+        parsed = json.loads(llm_response_text)
+        summary_text = parsed.get("summary", llm_response_text)
+    except Exception:
+        summary_text = llm_response_text
     print("Summary Text: ", summary_text)
     # Use guardrail for weekly summary
     try:
