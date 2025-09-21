@@ -235,15 +235,15 @@ def generate_weekly_report(date, db: Session, force_regen=False):
     # 3. Query LLM
     llm_response_text = query_ollama(formatted_prompt)
     print("LLM Response Text: ", llm_response_text)
-
-    parsed = extract_summary_from_response(llm_response_text)
-
+    
     try:
-        parsed = json.loads(llm_response_text)
+        parsed = extract_summary_from_response(llm_response_text)
         summary_text = parsed.get("summary", llm_response_text)
     except Exception:
         summary_text = llm_response_text
+
     print("Summary Text: ", summary_text)
+
     # Use guardrail for weekly summary
     try:
         summary_text = validate_llm_summary_output({"summary": summary_text}, ["summary"], context="weekly summary")
@@ -258,6 +258,7 @@ def generate_weekly_report(date, db: Session, force_regen=False):
 def extract_summary_from_response(response: str) -> dict:
     """
     Extract the summary JSON string safely, escaping control characters if needed.
+    Handles non-strict JSON by attempting to extract the summary value with regex if parsing fails.
     """
     import re, json
 
@@ -271,6 +272,10 @@ def extract_summary_from_response(response: str) -> dict:
         if match:
             json_str = match.group(0)
         else:
+            # Try to extract summary value directly
+            match = re.search(r'summary"?\s*:\s*"([^"]+)"', response)
+            if match:
+                return {"summary": match.group(1)}
             return {"summary": "Summary generation failed: Output format invalid or empty."}
 
     # Sanitize control characters in the JSON string (except for valid escapes)
@@ -279,6 +284,13 @@ def extract_summary_from_response(response: str) -> dict:
         return re.sub(r'(?<!\\)[\x00-\x1F]', lambda m: '\\u%04x' % ord(m.group()), s)
 
     try:
-        return json.loads(escape_control_chars(json_str))
+        # Try to fix single quotes and property names if needed
+        fixed_json = re.sub(r"([\{,]\s*)([a-zA-Z0-9_]+)(\s*:)", r'\1"\2"\3', json_str)
+        fixed_json = fixed_json.replace("'", '"')
+        return json.loads(escape_control_chars(fixed_json))
     except Exception as e:
+        # Fallback: try to extract summary value directly
+        match = re.search(r'summary"?\s*:\s*"([^"]+)"', json_str)
+        if match:
+            return {"summary": match.group(1)}
         return {"summary": f"Summary generation failed: {str(e)}"}
