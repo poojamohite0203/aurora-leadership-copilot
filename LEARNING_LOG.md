@@ -75,10 +75,32 @@
 - To Delete Data from a table
     ### Code Snippets / Commands
         sqlite3 aurora.db "DELETE FROM weekly_report;"
-
+- Types of Guardrails
+    1. Output Format Validation -- "Implemented"
+        Ensure the LLM output is valid JSON (if expected).
+        Check that required fields (like "summary") are present and are strings, not objects.
+        Fallback to a default message or retry if validation fails.
+    2. Content Length & Completeness -- "Implemented"
+        Set minimum and maximum length for the summary to avoid empty or excessively long outputs.
+        Check for truncation (e.g., summary ending with "...") and handle accordingly.
+    3. Content Safety -- "Implemented"
+        Scan for PII (personally identifiable information) or sensitive data leaks.
+        Filter profanity, hate speech, or unsafe content using a content moderation library or API.
+    4. Prompt Injection & Hallucination Mitigation -- "Implemented"
+        Sanitize user inputs before including them in prompts.
+        Detect and handle hallucinated facts (e.g., summary claims that don't match input data).
+    5. Retry & Fallback Logic
+        Retry LLM call if output is invalid or empty.
+        Fallback to a template-based summary if LLM fails repeatedly.
+    6. Logging & Monitoring -- "Implemented"
+        Log all LLM prompts and responses for auditing and debugging.
+        Alert on repeated failures or suspicious outputs.
+    7. Rate Limiting & Abuse Prevention
+        Limit how often a user can generate reports to prevent abuse or accidental overload.
+    8. User Feedback Loop
+        Allow users to flag/report bad summaries for review and model improvement.
 
 How to deploy ?
 Models to hugging face - Explore 
 Docker to any precompute service - 
-
 change the url - 

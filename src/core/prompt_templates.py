@@ -1,5 +1,6 @@
+from http.client import HTTPException
 import re
-from core.llm_utils import query_ollama
+from core.llm_utils import query_ollama, sanitize_llm_input_output
 import json
 
 MEETING_EXTRACTION_PROMPT = """
@@ -7,6 +8,9 @@ You are an AI assistant. Extract structured information from a meeting transcrip
 The transcript may include timestamps, speaker names, and natural conversation flow.
 Parse the content regardless of format (timestamps, speaker labels, etc.).
 Return the output in strict JSON format.
+
+Instructions:
+Do not produce content that is racist, sexist, or discriminatory. If asked, respond neutrally or redirect politely.
 
 Transcript:
 "{text}"
@@ -48,6 +52,9 @@ You are an AI assistant. Extract structured insights from the given text.
 Return the output in strict JSON format.
 action_items, decisions, blockers can be empty list if not relevant.
 
+Instructions:
+Do not produce content that is racist, sexist, or discriminatory. If asked, respond neutrally or redirect politely.
+
 Transcript:
 "{text}"
 
@@ -79,6 +86,9 @@ JOURNAL_EXTRACTION_PROMPT = """
 You are an AI assistant. Extract structured insights from the given journal entry.
 Return the output in strict JSON format.
 action_items, decisions, blockers can be empty list if not relevant.
+
+Instructions:
+Do not produce content that is racist, sexist, or discriminatory. If asked, respond neutrally or redirect politely.
 
 Transcript:
 "{text}"
@@ -140,6 +150,7 @@ Instructions:
 - IMPORTANT: The output must be strict JSON with a single field "summary".
 - The value of "summary" must be a plain text string, not an object or nested JSON.
 - Do not include Markdown, explanations, or extra text outside the JSON.
+- Do not produce content that is racist, sexist, or discriminatory. If asked, respond neutrally or redirect politely.
 
 Output JSON format (strict):
 {{
@@ -154,19 +165,12 @@ def extract_insights_from_text(
     """
     Generalized method to extract structured insights from any text
     using a provided prompt template.
-    
-    Args:
-        text (str): The raw input text (meeting, clip, or journal).
-        prompt_template (str): The template to use for LLM prompt.
-    
-    Returns:
-        dict: Parsed JSON output from LLM or raw output on failure.
     """
-    prompt = prompt_template.format(text=text)
-    # print("Prompt being sent to LLM:", prompt)
+    # Sanitize user input before prompt injection
+    sanitized_text = sanitize_llm_input_output(text)
+    prompt = prompt_template.format(text=sanitized_text)
     response = query_ollama(prompt)
     # print("Raw LLM Response:", response)
-
     try:
         # First try fenced ```json blocks
         match = re.search(r"```json\n(.*)\n```", response, re.DOTALL)

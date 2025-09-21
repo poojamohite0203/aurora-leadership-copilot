@@ -55,7 +55,7 @@ else:
                 st.caption(status.replace('_', ' ').title())
             with cols[3]:
                 new_status = st.selectbox(
-                    "",
+                    "Change Status",  # Non-empty label for accessibility
                     options=['open', 'in_progress', 'resolved', 'escalated', 'ignored'],
                     index=['open', 'in_progress', 'resolved', 'escalated', 'ignored'].index(status),
                     key=f"status_{blocker['id']}"

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from db.vector_store import search
+from core.llm_utils import check_moderation
 
 router = APIRouter(tags=["Search"])
 
@@ -10,6 +11,13 @@ def search_items(query: str, k: int = 5):
     Takes a query, converts it to an embedding, and finds closest matches in the vector DB.
     Returns raw items with metadata - no LLM involved.
     """
+
+    # Moderate Input
+    ok, categories = check_moderation(query)
+    if not ok:
+        print(f"User input blocked due to: {categories}")
+        raise ValueError(f"User input blocked due to: {categories}")
+    
     results = search(query, k)
     
     # Transform the results to a more user-friendly format
