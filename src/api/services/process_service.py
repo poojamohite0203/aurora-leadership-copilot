@@ -177,10 +177,10 @@ def extract_and_create_journal(text: str, db: Session):
     }
 
 def get_week_range(date):
-    # Always return Monday-Sunday for the week containing 'date'
+    # Always return Monday 00:00:00 to Sunday 23:59:59.999999 for the week containing 'date'
     date = date.replace(hour=0, minute=0, second=0, microsecond=0)
     week_start = date - timedelta(days=date.weekday())
-    week_end = week_start + timedelta(days=6)
+    week_end = week_start + timedelta(days=7) - timedelta(microseconds=1)
     return week_start, week_end
 
 def generate_weekly_report(date, db: Session, force_regen=False):
@@ -192,6 +192,14 @@ def generate_weekly_report(date, db: Session, force_regen=False):
             return report
 
     # 1. Gather weekly data
+    print(f"WEEK RANGE: {week_start} to {week_end}")
+    print("Meeting dates:", [m.date for m in db.query(models.Meeting).all()])
+    print("Clip dates:", [c.date for c in db.query(models.Clip).all()])
+    print("Journal dates:", [j.date for j in db.query(models.Journal).all()])
+    print("Action item dates:", [ai.date for ai in db.query(models.Action_Item).all()])
+    print("Decision dates:", [d.date for d in db.query(models.Decision).all()])
+    print("Blocker dates:", [b.date for b in db.query(models.Blocker).all()])
+    
     meetings_str = "\n".join([f"- {m.title}: {m.summary}" for m in db.query(models.Meeting).filter(
         models.Meeting.date.between(week_start, week_end))]) or "No meetings this week"
     
