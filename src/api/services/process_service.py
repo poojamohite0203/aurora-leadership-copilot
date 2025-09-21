@@ -256,19 +256,28 @@ def generate_weekly_report(date, db: Session, force_regen=False):
 
 def extract_summary_from_response(response: str) -> dict:
     """
-    Extract the summary JSON string safely.
+    Extract the summary JSON string safely, escaping control characters if needed.
     """
     import re, json
-    
+
     # Try fenced code block first
     match = re.search(r"```json\n(.*)\n```", response, re.DOTALL)
     if match:
-        return json.loads(match.group(1))
+        json_str = match.group(1)
+    else:
+        # Try any JSON inside braces
+        match = re.search(r"\{.*\}", response, re.DOTALL)
+        if match:
+            json_str = match.group(0)
+        else:
+            return {"summary": "Summary generation failed: Output format invalid or empty."}
 
-    # Try any JSON inside braces
-    match = re.search(r"\{.*\}", response, re.DOTALL)
-    if match:
-        return json.loads(match.group(0))
+    # Sanitize control characters in the JSON string (except for valid escapes)
+    def escape_control_chars(s):
+        # Only escape control chars inside string values, not JSON syntax
+        return re.sub(r'(?<!\\)[\x00-\x1F]', lambda m: '\\u%04x' % ord(m.group()), s)
 
-    # If no JSON, wrap whole response
-    return {"summary": "Summary generation failed: Output format invalid or empty."}
+    try:
+        return json.loads(escape_control_chars(json_str))
+    except Exception as e:
+        return {"summary": f"Summary generation failed: {str(e)}"}

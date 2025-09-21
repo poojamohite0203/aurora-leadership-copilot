@@ -13,7 +13,7 @@ def search_items(query: str, k: int = 5):
     """
 
     # Moderate Input
-    ok, categories = check_moderation(str)
+    ok, categories = check_moderation(query)
     if not ok:
         print(f"User input blocked due to: {categories}")
         raise ValueError(f"User input blocked due to: {categories}")
