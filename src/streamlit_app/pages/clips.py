@@ -21,6 +21,8 @@ render_sidebar()
 # Add new clip section
 st.header("➕ Add New Clip")
 with st.expander("Add Text Clip", expanded=False):
+    if "clip_text" not in st.session_state:
+        st.session_state["clip_text"] = ""
     clip_text = st.text_area(
         "Enter text or note:",
         placeholder="Paste your text, note, or snippet here...",
@@ -34,6 +36,7 @@ with st.expander("Add Text Clip", expanded=False):
                 result = extract_clip(clip_text)
                 if result:
                     st.success(f"✅ Clip extracted successfully! Clip ID: {result.get('id', 'N/A')}")
+                    st.session_state["clip_text"] = ""  # Clear input box
                     st.rerun()  # Refresh the page to show the new clip
                 else:
                     st.error("❌ Failed to extract clip data. Please try again.")

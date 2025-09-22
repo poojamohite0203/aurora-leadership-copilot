@@ -80,7 +80,7 @@ def get_all_meetings(db: Session, from_date: Optional[str] = None, to_date: Opti
         joinedload(models.Meeting.action_items),
         joinedload(models.Meeting.decisions),
         joinedload(models.Meeting.blockers)
-    )
+    ).order_by(models.Meeting.date.desc())
     
     if from_date:
         from_datetime = datetime.strptime(from_date, "%Y-%m-%d")
