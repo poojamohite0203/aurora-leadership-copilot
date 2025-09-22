@@ -1,6 +1,6 @@
 # src/services/rag_service.py
 from db.vector_store import search
-from core.llm_utils import query_ollama, check_moderation, validate_llm_summary_output, sanitize_llm_input_output
+from core.llm_utils import check_moderation, validate_llm_summary_output, sanitize_llm_input_output, query_gpt
 from db.vector_store import search
 import json
 
@@ -43,7 +43,7 @@ def ask_question(question: str, k: int = 5):
 
     # 3. Send prompt to Ollama
     prompt = RAG_PROMPT.format(context=context, question=question)
-    response = query_ollama(prompt)
+    response = query_gpt(prompt)
 
 
     # Validate LLM output

@@ -22,6 +22,15 @@ st.markdown("""
 # Add new meeting section
 st.header("➕ Add New Meeting")
 with st.expander("Add Meeting Transcript", expanded=False):
+    # Initialize or clear the session state if needed
+    if "clear_meeting_transcript" in st.session_state and st.session_state["clear_meeting_transcript"]:
+        st.session_state["meeting_transcript"] = ""
+        st.session_state["clear_meeting_transcript"] = False
+        st.rerun()
+    
+    if "meeting_transcript" not in st.session_state:
+        st.session_state["meeting_transcript"] = ""
+    
     transcript_text = st.text_area(
         "Enter meeting transcript:",
         placeholder="Paste your raw meeting transcript here (with timestamps, speaker names, etc.). The AI will automatically parse and extract insights.\n\nExample:\n'John Smith 9:30 AM: Let's discuss the API integration...\nJane Doe 9:32 AM: I think we should prioritize security...'",
@@ -35,7 +44,8 @@ with st.expander("Add Meeting Transcript", expanded=False):
                 result = extract_meeting(transcript_text)
                 if result:
                     st.success(f"✅ Meeting extracted successfully! Meeting ID: {result.get('id', 'N/A')}")
-                    st.rerun()  # Refresh the page to show the new meeting
+                    st.session_state["clear_meeting_transcript"] = True
+                    st.rerun()
                 else:
                     st.error("❌ Failed to extract meeting data. Please try again.")
         else:
@@ -53,8 +63,10 @@ if isinstance(meetings, str):
 if not meetings:
     st.info("No meetings found yet.")
 else:
+    # Sort meetings by id descending (newest first)
+    sorted_meetings = sorted(meetings, key=lambda m: m['id'], reverse=True)
     # Sidebar filter
-    meeting_titles = [f"{m['id']} - {m['title']}" for m in meetings]
+    meeting_titles = [f"{m['id']} - {m['title']}" for m in sorted_meetings]
     selected = st.sidebar.selectbox("Select a meeting", meeting_titles)
 
     meeting_id = int(selected.split(" - ")[0])

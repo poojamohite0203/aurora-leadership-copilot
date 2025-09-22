@@ -1,5 +1,6 @@
 import subprocess
 import json
+import re
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
@@ -12,6 +13,26 @@ def query_ollama(prompt: str, model: str = "llama3.1"):
     )
     return result.stdout.decode("utf-8")
 
+def query_gpt(prompt: str, model: str = "gpt-4.1-nano") -> str:
+    """
+    Query OpenAI's GPT model using the same API key as check_moderation.
+    Returns the generated text as a string.
+    """
+    load_dotenv()
+    import os
+    try:
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=2000,  # Increased from 512 to handle longer structured outputs
+            temperature=0.7
+        )
+        # Extract the assistant's reply
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"Error calling OpenAI API: {e}")
+        raise
 
 def validate_llm_output(data: dict, required_fields: list) -> bool:
     """
@@ -68,6 +89,7 @@ def validate_llm_summary_output(
     Central guardrail: Validate LLM output for required fields, content length, and safety.
     Returns the summary string if valid, else raises ValueError with a specific message.
     """
+    print("LLM Response:", extracted)
     if "raw_output" in extracted:
         print(f"LLM extraction failed for {context}")
         raise ValueError(f"LLM extraction failed for {context}")
@@ -124,3 +146,48 @@ def check_moderation(text: str):
     if results.flagged:
         return False, results.categories
     return True, None
+
+def extract_json_from_llm_response(response: str) -> dict:
+    """
+    Extract JSON from LLM response that may be wrapped in fenced code blocks.
+    Returns parsed JSON dict or {"raw_output": response} if extraction fails.
+    """
+    print("Before Extracting response", response)
+
+    if not isinstance(response, str):
+        return {"raw_output": str(response)}
+
+    # Step 1: Strip fenced code blocks if present
+    fenced_match = re.search(r"```(?:json)?\s*([\s\S]+?)\s*```", response, re.IGNORECASE)
+    if fenced_match:
+        response_text = fenced_match.group(1)
+    else:
+        response_text = response
+
+    response_text = response_text.strip()
+
+    # Step 2: Find the first '{' and extract balanced JSON using brace counting
+    start_idx = response_text.find('{')
+    if start_idx == -1:
+        return {"raw_output": response}  # no JSON found
+
+    brace_count = 0
+    end_idx = start_idx
+    for i, char in enumerate(response_text[start_idx:], start=start_idx):
+        if char == '{':
+            brace_count += 1
+        elif char == '}':
+            brace_count -= 1
+            if brace_count == 0:
+                end_idx = i
+                break
+
+    json_str = response_text[start_idx:end_idx+1]
+
+    # Step 3: Parse JSON safely
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError as e:
+        print(f"JSON decode error: {e}")
+        print(f"Attempted to parse: {json_str[:500]}...")
+        return {"raw_output": response}
