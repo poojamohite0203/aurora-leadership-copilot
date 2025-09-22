@@ -22,7 +22,7 @@ render_sidebar()
 st.header("➕ Agetdd New Journal Entry")
 with st.expander("Add Journal Entry", expanded=False):
     if "journal_text" not in st.session_state:
-        st.session_state["journal_text"] = ""
+        st.rerun()
     journal_text = st.text_area(
         "Enter journal entry:",
         placeholder="Write about your day, thoughts, learnings, challenges, wins, etc...",
@@ -36,7 +36,6 @@ with st.expander("Add Journal Entry", expanded=False):
                 result = extract_journal(journal_text)
                 if result:
                     st.success(f"✅ Journal extracted successfully! Journal ID: {result.get('id', 'N/A')}")
-                    st.session_state["journal_text"] = ""  # Clear input box
                     st.rerun()  # Refresh the page to show the new journal
                 else:
                     st.error("❌ Failed to extract journal data. Please try again.")
