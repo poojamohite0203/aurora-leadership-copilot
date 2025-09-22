@@ -166,30 +166,10 @@ def extract_insights_from_text(
     Generalized method to extract structured insights from any text
     using a provided prompt template.
     """
+    from .llm_utils import extract_json_from_llm_response
     # Sanitize user input before prompt injection
     sanitized_text = sanitize_llm_input_output(text)
     prompt = prompt_template.format(text=sanitized_text)
     response = query_gpt(prompt)
     # print("Raw LLM Response:", response)
-    try:
-        # First try fenced ```json blocks
-        match = re.search(r"```json\n(.*)\n```", response, re.DOTALL)
-        if match:
-            json_string = match.group(1)
-            return json.loads(json_string)
-        
-        # Fallback: try any {} JSON block
-        match = re.search(r"\{.*\}", response, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))
-        
-        # If no JSON, return raw output
-        print("No JSON found in LLM response")
-        return {"raw_output": response}
-
-    except json.JSONDecodeError as e:
-        print(f"Error parsing JSON: {e}")
-        return {"raw_output": response}
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        return {"raw_output": response}
+    return extract_json_from_llm_response(response)

@@ -260,37 +260,16 @@ def extract_summary_from_response(response: str) -> dict:
     Extract the summary JSON string safely, escaping control characters if needed.
     Handles non-strict JSON by attempting to extract the summary value with regex if parsing fails.
     """
-    import re, json
-
-    # Try fenced code block first
-    match = re.search(r"```json\n(.*)\n```", response, re.DOTALL)
-    if match:
-        json_str = match.group(1)
-    else:
-        # Try any JSON inside braces
-        match = re.search(r"\{.*\}", response, re.DOTALL)
-        if match:
-            json_str = match.group(0)
-        else:
-            # Try to extract summary value directly
-            match = re.search(r'summary"?\s*:\s*"([^"]+)"', response)
-            if match:
-                return {"summary": match.group(1)}
-            return {"summary": "Summary generation failed: Output format invalid or empty."}
-
-    # Sanitize control characters in the JSON string (except for valid escapes)
-    def escape_control_chars(s):
-        # Only escape control chars inside string values, not JSON syntax
-        return re.sub(r'(?<!\\)[\x00-\x1F]', lambda m: '\\u%04x' % ord(m.group()), s)
-
-    try:
-        # Try to fix single quotes and property names if needed
-        fixed_json = re.sub(r"([\{,]\s*)([a-zA-Z0-9_]+)(\s*:)", r'\1"\2"\3', json_str)
-        fixed_json = fixed_json.replace("'", '"')
-        return json.loads(escape_control_chars(fixed_json))
-    except Exception as e:
-        # Fallback: try to extract summary value directly
-        match = re.search(r'summary"?\s*:\s*"([^"]+)"', json_str)
+    from ...core.llm_utils import extract_json_from_llm_response
+    
+    result = extract_json_from_llm_response(response)
+    
+    # If extraction failed, try to extract summary value directly as fallback
+    if "raw_output" in result:
+        import re
+        match = re.search(r'summary"?\s*:\s*"([^"]+)"', response)
         if match:
             return {"summary": match.group(1)}
-        return {"summary": f"Summary generation failed: {str(e)}"}
+        return {"summary": "Summary generation failed: Output format invalid or empty."}
+    
+    return result
