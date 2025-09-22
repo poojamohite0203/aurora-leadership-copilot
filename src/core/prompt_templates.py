@@ -1,6 +1,6 @@
 from http.client import HTTPException
 import re
-from core.llm_utils import query_ollama, sanitize_llm_input_output
+from core.llm_utils import sanitize_llm_input_output, query_gpt
 import json
 
 MEETING_EXTRACTION_PROMPT = """
@@ -169,7 +169,7 @@ def extract_insights_from_text(
     # Sanitize user input before prompt injection
     sanitized_text = sanitize_llm_input_output(text)
     prompt = prompt_template.format(text=sanitized_text)
-    response = query_ollama(prompt)
+    response = query_gpt(prompt)
     # print("Raw LLM Response:", response)
     try:
         # First try fenced ```json blocks

@@ -12,6 +12,22 @@ def query_ollama(prompt: str, model: str = "llama3.1"):
     )
     return result.stdout.decode("utf-8")
 
+def query_gpt(prompt: str, model: str = "gpt-4o-mini") -> str:
+    """
+    Query OpenAI's GPT model using the same API key as check_moderation.
+    Returns the generated text as a string.
+    """
+    load_dotenv()
+    import os
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    response = client.chat.completions.create(
+        model=model,
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=512,
+        temperature=0.7
+    )
+    # Extract the assistant's reply
+    return response.choices[0].message.content.strip()
 
 def validate_llm_output(data: dict, required_fields: list) -> bool:
     """
@@ -68,6 +84,7 @@ def validate_llm_summary_output(
     Central guardrail: Validate LLM output for required fields, content length, and safety.
     Returns the summary string if valid, else raises ValueError with a specific message.
     """
+    print("LLM Response:", extracted)
     if "raw_output" in extracted:
         print(f"LLM extraction failed for {context}")
         raise ValueError(f"LLM extraction failed for {context}")

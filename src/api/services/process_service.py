@@ -9,7 +9,7 @@ from db.vector_store import add_to_index
 from sqlalchemy import and_
 from core.prompt_templates import WEEKLY_REPORT_PROMPT
 import json, re
-from core.llm_utils import query_ollama, validate_llm_summary_output, check_moderation
+from core.llm_utils import validate_llm_summary_output, check_moderation, query_gpt
 
 def extract_and_create_meeting(transcript: str, db: Session):
     """
@@ -233,7 +233,7 @@ def generate_weekly_report(date, db: Session, force_regen=False):
     print("Formatted Prompt: ", formatted_prompt)
 
     # 3. Query LLM
-    llm_response_text = query_ollama(formatted_prompt)
+    llm_response_text = query_gpt(formatted_prompt)
     print("LLM Response Text: ", llm_response_text)
     
     try:
