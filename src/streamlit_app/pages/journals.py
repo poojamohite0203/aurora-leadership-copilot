@@ -19,10 +19,17 @@ st.markdown("""
 render_sidebar()
 
 # Add new journal section
-st.header("➕ Agetdd New Journal Entry")
+st.header("➕ Add New Journal Entry")
 with st.expander("Add Journal Entry", expanded=False):
-    if "journal_text" not in st.session_state:
+    # Initialize or clear the session state if needed
+    if "clear_journal_text" in st.session_state and st.session_state["clear_journal_text"]:
+        st.session_state["journal_text"] = ""
+        st.session_state["clear_journal_text"] = False
         st.rerun()
+    
+    if "journal_text" not in st.session_state:
+        st.session_state["journal_text"] = ""
+    
     journal_text = st.text_area(
         "Enter journal entry:",
         placeholder="Write about your day, thoughts, learnings, challenges, wins, etc...",
@@ -36,7 +43,8 @@ with st.expander("Add Journal Entry", expanded=False):
                 result = extract_journal(journal_text)
                 if result:
                     st.success(f"✅ Journal extracted successfully! Journal ID: {result.get('id', 'N/A')}")
-                    st.rerun()  # Refresh the page to show the new journal
+                    st.session_state["clear_journal_text"] = True
+                    st.rerun()
                 else:
                     st.error("❌ Failed to extract journal data. Please try again.")
         else:
@@ -49,7 +57,9 @@ journals = get_journals()
 if not journals:
     st.info("No journals found yet.")
 else:
-    selected = st.sidebar.selectbox("Select a journal", [f"{j['id']} - {j['summary'][:40]}" for j in journals])
+    # Sort journals by id descending (newest first)
+    sorted_journals = sorted(journals, key=lambda j: j['id'], reverse=True)
+    selected = st.sidebar.selectbox("Select a journal", [f"{j['id']} - {j['summary'][:40]}" for j in sorted_journals])
     journal_id = int(selected.split(" - ")[0])
     details = get_journal_details(journal_id)
 

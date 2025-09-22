@@ -15,14 +15,21 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Render the custom sidebar
+# Render the custom sidebar 
 render_sidebar()
 
 # Add new clip section
 st.header("➕ Add New Clip")
 with st.expander("Add Text Clip", expanded=False):
-    if "clip_text" not in st.session_state:
+    # Initialize or clear the session state if needed
+    if "clear_clip_text" in st.session_state and st.session_state["clear_clip_text"]:
+        st.session_state["clip_text"] = ""
+        st.session_state["clear_clip_text"] = False
         st.rerun()
+    
+    if "clip_text" not in st.session_state:
+        st.session_state["clip_text"] = ""
+    
     clip_text = st.text_area(
         "Enter text or note:",
         placeholder="Paste your text, note, or snippet here...",
@@ -36,7 +43,8 @@ with st.expander("Add Text Clip", expanded=False):
                 result = extract_clip(clip_text)
                 if result:
                     st.success(f"✅ Clip extracted successfully! Clip ID: {result.get('id', 'N/A')}")
-                    st.rerun()  # Refresh the page to show the new clip
+                    st.session_state["clear_clip_text"] = True
+                    st.rerun()
                 else:
                     st.error("❌ Failed to extract clip data. Please try again.")
         else:
@@ -49,7 +57,9 @@ clips = get_clips()
 if not clips:
     st.info("No clips found yet.")
 else:
-    selected = st.sidebar.selectbox("Select a clip", [f"{c['id']} - {c['summary'][:40]}" for c in clips])
+    # Sort clips by id descending (newest first)
+    sorted_clips = sorted(clips, key=lambda c: c['id'], reverse=True)
+    selected = st.sidebar.selectbox("Select a clip", [f"{c['id']} - {c['summary'][:40]}" for c in sorted_clips])
     clip_id = int(selected.split(" - ")[0])
     details = get_clip_details(clip_id)
 
