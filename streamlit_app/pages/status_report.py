@@ -64,10 +64,25 @@ else:
     st.divider()
     for r in reversed(reports):
         with st.expander(f"Week of {r['week_start']} → {r['week_end']}"):
-            st.write(r["summary"])
+            # Clean up summary display - handle both old JSON format and new plain text
+            summary = r["summary"]
+            if summary.strip().startswith('{"summary":'):
+                try:
+                    import json
+                    parsed = json.loads(summary)
+                    summary = parsed.get("summary", summary)
+                except:
+                    pass
+            elif '"summary":' in summary:
+                import re
+                match = re.search(r'"summary":\s*"([^"]+)"', summary)
+                if match:
+                    summary = match.group(1)
+            
+            st.write(summary)
             st.download_button(
                 "Download Report",
-                r["summary"],
+                summary,
                 file_name=f"weekly_report_{r['week_start']}.txt",
                 key=f"download_{r['week_start']}"
             )

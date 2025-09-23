@@ -131,13 +131,43 @@ def get_weekly_report_service(date: str, force_regen: bool, db):
     
 def list_weekly_reports_service(db):
     from db.crud import list_weekly_reports
+    import re
+    import json
+    
+    def clean_summary(summary_text):
+        """Clean up summary text to handle both old JSON format and new plain text format"""
+        if not summary_text:
+            return "No summary available"
+        
+        # If it's already plain text (doesn't start with JSON), return as-is
+        summary_text = summary_text.strip()
+        if not (summary_text.startswith('{"summary":') or summary_text.startswith('"summary":')):
+            return summary_text
+        
+        # Try to extract summary from JSON format (for old reports)
+        try:
+            # Handle both full JSON and partial JSON formats
+            if summary_text.startswith('{"summary":'):
+                parsed = json.loads(summary_text)
+                return parsed.get("summary", summary_text)
+            elif '"summary":' in summary_text:
+                # Use regex to extract the summary value
+                match = re.search(r'"summary":\s*"([^"]+)"', summary_text)
+                if match:
+                    return match.group(1)
+        except (json.JSONDecodeError, KeyError):
+            pass
+        
+        # If parsing fails, return the original text
+        return summary_text
+    
     reports = list_weekly_reports(db)
     return [
         {
             "week_start": r.week_start.strftime("%Y-%m-%d"),
             "week_end": r.week_end.strftime("%Y-%m-%d"),
             "created_at": r.created_at,
-            "summary": r.summary
+            "summary": clean_summary(r.summary)
         }
         for r in reports
     ]
