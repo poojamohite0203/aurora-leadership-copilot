@@ -3,11 +3,6 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
 import os
 from sqlalchemy.orm import sessionmaker, declarative_base
-from .database import engine, Base
-from .models import Meeting, Clip, Journal
-
-# Create tables on import
-Base.metadata.create_all(bind=engine)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILENAME = "aurora.db"  # Your SQLite DB filename
@@ -26,6 +21,9 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+# Create tables on import
+Base.metadata.create_all(bind=engine)
 
 # Dependency
 def get_db():
