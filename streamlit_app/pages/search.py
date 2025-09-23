@@ -1,6 +1,10 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 import streamlit as st
-from utils.api_client import search_items
-from sidebar import render_sidebar
+from streamlit_app.utils.backend_client import search_items
+from streamlit_app.sidebar import render_sidebar
 
 # Render the custom sidebar
 render_sidebar()

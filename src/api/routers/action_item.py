@@ -4,6 +4,8 @@ from db import crud, models
 from db.database import get_db
 from typing import Optional
 from pydantic import BaseModel
+from api.services.get_service import get_all_action_items_service, get_action_item_details_service
+from api.services.update_service import update_action_item_status_service
 
 router = APIRouter(tags=["Action Items"])
 
@@ -21,14 +23,14 @@ def get_all_action_items(
     By default shows only open/in_progress items.
     """
     try:
-        return crud.get_all_action_items_with_status(db, include_archived, limit)
+        return get_all_action_items_service(db, include_archived, limit)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{id}")
 def get_action_item_details(id: int, db: Session = Depends(get_db)):
     """Get a specific action item by ID"""
-    action_item = crud.get_action_item_by_id(db, id)
+    action_item = get_action_item_details_service(db, id)
     if not action_item:
         raise HTTPException(status_code=404, detail="Action item not found")
     
@@ -41,16 +43,11 @@ def update_action_item_status(
     db: Session = Depends(get_db)
 ):
     """Update action item status"""
-    try:
-        # Validate status
-        status = models.ActionItemStatus(request.status)
-        
-        action_item = crud.update_action_item_status(db, id, status)
-        if not action_item:
-            raise HTTPException(status_code=404, detail="Action item not found")
-        
-        return {"message": f"Action item status updated to {status.value}", "action_item": action_item}
-    except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid status. Valid options: {[s.value for s in models.ActionItemStatus]}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    action_item, error = update_action_item_status_service(db, id, request.status)
+    if error:
+        if "not found" in error:
+            raise HTTPException(status_code=404, detail=error)
+        if "Invalid status" in error:
+            raise HTTPException(status_code=400, detail=error)
+        raise HTTPException(status_code=500, detail=error)
+    return {"message": f"Action item status updated to {action_item.status.value}", "action_item": action_item}

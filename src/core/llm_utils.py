@@ -89,7 +89,7 @@ def validate_llm_summary_output(
     Central guardrail: Validate LLM output for required fields, content length, and safety.
     Returns the summary string if valid, else raises ValueError with a specific message.
     """
-    print("LLM Response:", extracted)
+    # print("LLM Response:", extracted)
     if "raw_output" in extracted:
         print(f"LLM extraction failed for {context}")
         raise ValueError(f"LLM extraction failed for {context}")

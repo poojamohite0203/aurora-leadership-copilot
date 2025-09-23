@@ -1,5 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import streamlit as st
-from utils.api_client import get_meetings, get_meeting_details, extract_meeting
+from streamlit_app.utils.backend_client import get_meetings, get_meeting_details, extract_meeting
 from sidebar import render_sidebar
 
 st.set_page_config(page_title="Meetings", layout="wide")
@@ -86,20 +89,24 @@ else:
     with st.expander("✅ Action Items"):
         if details.get("action_items"):
             for a in details["action_items"]:
-                st.write(f"- {a['description']} (due: {a.get('due_date','N/A')})")
+                due_date = getattr(a, 'due_date', 'N/A') if hasattr(a, 'due_date') else a.get('due_date', 'N/A')
+                description = getattr(a, 'description', 'N/A') if hasattr(a, 'description') else a.get('description', 'N/A')
+                st.write(f"- {description} (due: {due_date})")
         else:
             st.write("No action items.")
 
     with st.expander("🗳 Decisions"):
         if details.get("decisions"):
             for d in details["decisions"]:
-                st.write(f"- {d['description']}")
+                description = getattr(d, 'description', 'N/A') if hasattr(d, 'description') else d.get('description', 'N/A')
+                st.write(f"- {description}")
         else:
             st.write("No decisions.")
 
     with st.expander("⛔ Blockers"):
         if details.get("blockers"):
             for b in details["blockers"]:
-                st.write(f"- {b['description']}")
+                description = getattr(b, 'description', 'N/A') if hasattr(b, 'description') else b.get('description', 'N/A')
+                st.write(f"- {description}")
         else:
             st.write("No blockers.")

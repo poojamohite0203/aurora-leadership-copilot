@@ -192,13 +192,13 @@ def generate_weekly_report(date, db: Session, force_regen=False):
             return report
 
     # 1. Gather weekly data
-    print(f"WEEK RANGE: {week_start} to {week_end}")
-    print("Meeting dates:", [m.date for m in db.query(models.Meeting).all()])
-    print("Clip dates:", [c.date for c in db.query(models.Clip).all()])
-    print("Journal dates:", [j.date for j in db.query(models.Journal).all()])
-    print("Action item dates:", [ai.date for ai in db.query(models.Action_Item).all()])
-    print("Decision dates:", [d.date for d in db.query(models.Decision).all()])
-    print("Blocker dates:", [b.date for b in db.query(models.Blocker).all()])
+    # print(f"WEEK RANGE: {week_start} to {week_end}")
+    # print("Meeting dates:", [m.date for m in db.query(models.Meeting).all()])
+    # print("Clip dates:", [c.date for c in db.query(models.Clip).all()])
+    # print("Journal dates:", [j.date for j in db.query(models.Journal).all()])
+    # print("Action item dates:", [ai.date for ai in db.query(models.Action_Item).all()])
+    # print("Decision dates:", [d.date for d in db.query(models.Decision).all()])
+    # print("Blocker dates:", [b.date for b in db.query(models.Blocker).all()])
     
     meetings_str = "\n".join([f"- {m.title}: {m.summary}" for m in db.query(models.Meeting).filter(
         models.Meeting.date.between(week_start, week_end))]) or "No meetings this week"
@@ -230,27 +230,45 @@ def generate_weekly_report(date, db: Session, force_regen=False):
         decisions=decisions_str,
         blockers=blockers_str,
     )
-    print("Formatted Prompt: ", formatted_prompt)
+    #print("Formatted Prompt: ", formatted_prompt)
 
     # 3. Query LLM
     llm_response_text = query_gpt(formatted_prompt)
-    print("LLM Response Text: ", llm_response_text)
+    # print("LLM Response Text: ", llm_response_text)
     
     try:
         parsed = extract_summary_from_response(llm_response_text)
-        summary_text = parsed.get("summary", llm_response_text)
-    except Exception:
+        # print("DEBUG: Type of parsed:", type(parsed))
+        # print("DEBUG: Parsed content:", parsed)
+        
+        # More explicit extraction with better error handling
+        if isinstance(parsed, dict) and "summary" in parsed:
+            summary_text = parsed["summary"]
+            # print("DEBUG: Successfully extracted summary from dict")
+        else:
+            # print("DEBUG: Failed to extract summary from dict, using raw text")
+            summary_text = llm_response_text
+            
+        # print("DEBUG: Type of summary_text:", type(summary_text))
+        # print("DEBUG: summary_text content:", repr(summary_text[:200]))
+    except Exception as e:
+        # print(f"Exception in extract_summary_from_response: {e}")
         summary_text = llm_response_text
 
-    print("Summary Text: ", summary_text)
+    # print("Summary Text: ", summary_text)
 
     # Use guardrail for weekly summary
     try:
-        summary_text = validate_llm_summary_output({"summary": summary_text}, ["summary"], context="weekly summary")
+        # print("DEBUG: Before validation - summary_text:", repr(summary_text[:200]))
+        validated_summary = validate_llm_summary_output({"summary": summary_text}, ["summary"], context="weekly summary")
+        # print("DEBUG: After validation - type:", type(validated_summary))
+        # print("DEBUG: After validation - content:", repr(validated_summary[:200]))
+        summary_text = validated_summary
     except ValueError as e:
         print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
+    # print("DEBUG: Final summary_text before DB save:", repr(summary_text[:200]))
     report = create_weekly_report(db, week_start, week_end, summary_text)
 
     return report
@@ -260,16 +278,40 @@ def extract_summary_from_response(response: str) -> dict:
     Extract the summary JSON string safely, escaping control characters if needed.
     Handles non-strict JSON by attempting to extract the summary value with regex if parsing fails.
     """
-    from ...core.llm_utils import extract_json_from_llm_response
+    from core.llm_utils import extract_json_from_llm_response
     
+    # print("DEBUG extract_summary_from_response: Input response:", repr(response[:200]))
     result = extract_json_from_llm_response(response)
+    # print("DEBUG extract_summary_from_response: extract_json_from_llm_response result:", result)
     
     # If extraction failed, try to extract summary value directly as fallback
     if "raw_output" in result:
         import re
         match = re.search(r'summary"?\s*:\s*"([^"]+)"', response)
         if match:
+            # print("DEBUG extract_summary_from_response: Using regex fallback, extracted:", match.group(1))
             return {"summary": match.group(1)}
+        # print("DEBUG extract_summary_from_response: Regex fallback failed")
         return {"summary": "Summary generation failed: Output format invalid or empty."}
     
+    # print("DEBUG extract_summary_from_response: Returning result:", result)
     return result
+
+def post_weekly_report_service(payload: dict, db):
+    """Generate or fetch a weekly report for the week containing the given date (POST)."""
+    from datetime import datetime
+    try:
+        date_str = payload.get("date")
+        force_regen = payload.get("force_regen", False)
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+        report = generate_weekly_report(date_obj, db, force_regen=force_regen)
+        if not report:
+            return {"error": "No report found or generated for the given week."}
+        return {
+            "week_start": report.week_start.strftime("%Y-%m-%d"),
+            "week_end": report.week_end.strftime("%Y-%m-%d"),
+            "summary": report.summary,
+            "created_at": report.created_at
+        }
+    except Exception as e:
+        return {"error": str(e)}

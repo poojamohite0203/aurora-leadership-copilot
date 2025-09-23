@@ -1,3 +1,18 @@
+aurora-leadership-copilot/
+├── streamlit_app/          # 📍 Now at root level for Streamlit Cloud
+│   ├── app.py             # Main dashboard
+│   ├── sidebar.py         # Navigation
+│   ├── pages/             # All Streamlit pages
+│   └── utils/
+│       └── backend_client.py  # 🔄 Direct Python service calls
+├── src/                   # Backend code
+│   ├── api/services/      # Service layer (extracted from routers)
+│   ├── core/             # LLM utilities
+│   └── db/               # Database models
+├── setup.py              # ✅ Package configuration
+└── requirements.txt      # ✅ Updated with `-e .`
+
+
 
 All EndPoints 
 

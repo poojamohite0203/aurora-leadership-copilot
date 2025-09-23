@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Query, Body
 from api.services.process_service import extract_and_create_journal
+from api.services.get_service import get_all_journals_service, get_journal_details_service
 from sqlalchemy.orm import Session
 from db import crud
 from db.database import get_db
@@ -17,7 +18,7 @@ def get_all_journals(
     Optional limit parameter to control the number of results.
     """
     try:
-        return crud.get_all_journals(db, limit)
+        return get_all_journals_service(db, limit)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -37,16 +38,7 @@ def extract_journal(text: str = Body(..., media_type="text/plain"), db: Session 
 @router.get("/{id}")
 def get_journal_details(id: int, db: Session = Depends(get_db)):
     """Get a specific journal by ID without nested data"""
-    journal = crud.get_journal_by_id(db, id)
+    journal = get_journal_details_service(db, id)
     if not journal:
         raise HTTPException(status_code=404, detail="Journal not found")
-    
-    return {
-        "id": journal.id,
-        "text": journal.text,
-        "summary": journal.summary,
-        "date": journal.date,
-        "theme": journal.theme,
-        "strength": journal.strength,
-        "growth_area": journal.growth_area
-    }
+    return journal

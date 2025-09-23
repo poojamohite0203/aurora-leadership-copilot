@@ -4,6 +4,7 @@ from db import crud, models
 from db.database import get_db
 from typing import Optional
 from pydantic import BaseModel
+from api.services.get_service import get_all_blockers_service, get_blocker_details_service
 
 router = APIRouter(tags=["Blockers"])
 
@@ -21,14 +22,14 @@ def get_all_blockers(
     By default shows only open/in_progress blockers.
     """
     try:
-        return crud.get_all_blockers_with_status(db, include_archived, limit)
+        return get_all_blockers_service(db, include_archived, limit)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{id}")
 def get_blocker_details(id: int, db: Session = Depends(get_db)):
     """Get a specific blocker by ID"""
-    blocker = crud.get_blocker_by_id(db, id)
+    blocker = get_blocker_details_service(db, id)
     if not blocker:
         raise HTTPException(status_code=404, detail="Blocker not found")
     
@@ -54,14 +55,3 @@ def update_blocker_status(
         raise HTTPException(status_code=400, detail=f"Invalid status. Valid options: {[s.value for s in models.BlockerStatus]}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/{id}")
-def get_blocker_details(id: int, db: Session = Depends(get_db)):
-    """Get a specific blocker by ID"""
-    blocker = crud.get_blocker_by_id(db, id)
-    if not blocker:
-        raise HTTPException(status_code=404, detail="Blocker not found")
-    
-    return blocker

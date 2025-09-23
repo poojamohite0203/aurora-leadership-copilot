@@ -1,6 +1,10 @@
 import streamlit as st
-from utils.api_client import get_meetings, get_clips, get_journals, get_action_items
-from sidebar import render_sidebar
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from streamlit_app.utils.backend_client import get_meetings, get_clips, get_journals, get_action_items
+from streamlit_app.sidebar import render_sidebar
 
 st.set_page_config(page_title="AI Productivity Dashboard", layout="wide")
 
@@ -39,20 +43,20 @@ with col1:
 
 with col2:
     # Only count open and in_progress action items
-    active_actions = [a for a in actions if a.get("status") in ["open", "in_progress"]]
+    active_actions = [a for a in actions if hasattr(a, 'status') and a.status in ["open", "in_progress"]]
     st.metric("Open Action Items", len(active_actions))
     st.page_link("pages/action_tracker.py", label="Action Tracker")
 
 with col3:
     st.metric("Latest Clips", len(clips))
     if clips:
-        st.write(f"📝 {clips[-1]['summary'][:50]}...")
+        st.write(f"📝 {clips[-1].summary[:50]}...")
     st.page_link("pages/clips.py", label="View Clips")
 
 with col4:
     if journals:
         st.metric("Latest Journal", len(journals))
-        st.write(f"📔 {journals[-1]['text'][:50]}...")
+        st.write(f"📔 {journals[-1].text[:50]}...")
     else:
         st.metric("Latest Journal", 0)
     st.page_link("pages/journals.py", label="View Journals")

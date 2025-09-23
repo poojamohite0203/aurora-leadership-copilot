@@ -4,6 +4,7 @@ from db import crud, models
 from db.database import get_db
 from typing import Optional
 from pydantic import BaseModel
+from api.services.get_service import get_all_decisions_service, get_decision_details_service
 
 router = APIRouter(tags=["Decisions"])
 
@@ -21,14 +22,14 @@ def get_all_decisions(
     By default shows only open decisions.
     """
     try:
-        return crud.get_all_decisions_with_status(db, include_archived, limit)
+        return get_all_decisions_service(db, include_archived, limit)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{id}")
 def get_decision_details(id: int, db: Session = Depends(get_db)):
     """Get a specific decision by ID"""
-    decision = crud.get_decision_by_id(db, id)
+    decision = get_decision_details_service(db, id)
     if not decision:
         raise HTTPException(status_code=404, detail="Decision not found")
     
