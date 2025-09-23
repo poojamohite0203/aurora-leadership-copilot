@@ -101,3 +101,17 @@
         Allow users to flag/report bad summaries for review and model improvement.
 
 - How to re-install requirements.txt
+        pip uninstall -r requirements.txt -y
+            pip install -r requirements.txt
+
+            OR    
+             pip install --force-reinstall -r requirements.txt
+
+# Build the image
+docker build -t aurora-copilot .
+
+# Run the container
+docker run -p 8501:8501 aurora-copilot
+
+# when you run in docker - your app will be @ http://localhost:8501/
+
