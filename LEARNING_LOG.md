@@ -100,7 +100,4 @@
     8. User Feedback Loop
         Allow users to flag/report bad summaries for review and model improvement.
 
-How to deploy ?
-Models to hugging face - Explore 
-Docker to any precompute service - 
-change the url - 
+- How to re-install requirements.txt
