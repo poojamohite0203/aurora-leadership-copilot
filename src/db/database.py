@@ -5,7 +5,7 @@ import os
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILENAME = "app_data.db"  # Your SQLite DB filename
+DB_FILENAME = "aurora.db"  # Your SQLite DB filename
 DB_PATH = os.path.join(BASE_DIR, DB_FILENAME)
 
 # Auto-create DB if missing
