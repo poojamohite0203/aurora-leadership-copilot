@@ -50,8 +50,13 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
 ```   
 
 ## Run the Stream Lit UI
+    #Activate your virtual environment (if not already):
+        python3 -m venv .venv
+        source .venv/bin/activate
+    # Install the requirements
+        pip install -r requirements.txt
     # Will render on http://localhost:8501
-    streamlit run src/streamlit_app/app.py
+        streamlit run src/streamlit_app/app.py
 
 ## API's
     /search
