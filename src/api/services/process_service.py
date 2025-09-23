@@ -255,7 +255,7 @@ def generate_weekly_report(date, db: Session, force_regen=False):
         # print(f"Exception in extract_summary_from_response: {e}")
         summary_text = llm_response_text
 
-    print("Summary Text: ", summary_text)
+    # print("Summary Text: ", summary_text)
 
     # Use guardrail for weekly summary
     try:
@@ -268,7 +268,7 @@ def generate_weekly_report(date, db: Session, force_regen=False):
         print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
-    print("DEBUG: Final summary_text before DB save:", repr(summary_text[:200]))
+    # print("DEBUG: Final summary_text before DB save:", repr(summary_text[:200]))
     report = create_weekly_report(db, week_start, week_end, summary_text)
 
     return report
