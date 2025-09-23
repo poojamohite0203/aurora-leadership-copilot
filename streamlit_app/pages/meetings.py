@@ -1,5 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import streamlit as st
-from utils.api_client import get_meetings, get_meeting_details, extract_meeting
+from streamlit_app.utils.backend_client import get_meetings, get_meeting_details, extract_meeting
 from sidebar import render_sidebar
 
 st.set_page_config(page_title="Meetings", layout="wide")

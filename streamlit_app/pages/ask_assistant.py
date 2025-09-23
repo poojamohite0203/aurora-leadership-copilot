@@ -1,6 +1,10 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 import streamlit as st
-from utils.api_client import ask_ai
-from sidebar import render_sidebar
+from streamlit_app.utils.backend_client import ask_ai
+from streamlit_app.sidebar import render_sidebar
 
 st.set_page_config(page_title="Ask Assistant", layout="wide")
 render_sidebar()

@@ -1,5 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import streamlit as st
-from utils.api_client import get_journals, get_journal_details, extract_journal
+from streamlit_app.utils.backend_client import get_journals, get_journal_details, extract_journal
 from sidebar import render_sidebar
 
 st.set_page_config(page_title="Journals", layout="wide")

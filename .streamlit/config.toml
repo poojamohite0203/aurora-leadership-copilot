@@ -1,0 +1,11 @@
+# Streamlit Configuration for Streamlit Cloud
+
+[server]
+port = 8501
+headless = true
+
+[theme]
+base = "light"
+
+[browser]
+gatherUsageStats = false

@@ -1,6 +1,10 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 import streamlit as st
-from utils.api_client import get_action_items, update_action_item_status
-from sidebar import render_sidebar
+from streamlit_app.utils.backend_client import get_action_items, update_action_item_status
+from streamlit_app.sidebar import render_sidebar
 import pandas as pd
 
 st.set_page_config(page_title="Action Tracker", layout="wide")

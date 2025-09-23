@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import streamlit as st
 from utils.api_client import get_clips, get_clip_details, extract_clip
 from sidebar import render_sidebar

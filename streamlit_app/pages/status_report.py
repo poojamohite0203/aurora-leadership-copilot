@@ -1,6 +1,8 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import streamlit as st
-from utils.api_client import get_weekly_reports
-from utils.api_client import generate_weekly_report
+from streamlit_app.utils.backend_client import get_weekly_reports, generate_weekly_report
 from sidebar import render_sidebar
 import datetime
 
