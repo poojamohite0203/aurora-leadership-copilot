@@ -56,7 +56,7 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
     # Install the requirements
         pip install -r requirements.txt
     # Will render on http://localhost:8501
-        streamlit run src/streamlit_app/app.py
+        streamlit run streamlit_app/app.py
 
 ## API's
     /search

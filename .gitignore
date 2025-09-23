@@ -215,3 +215,4 @@ aurora.db
 *.chroma
 chroma.sqlite3
 chroma_data/
+.streamlit/secrets.toml
