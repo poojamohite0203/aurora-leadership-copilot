@@ -1,9 +1,10 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 import streamlit as st
-from utils.api_client import get_clips, get_clip_details, extract_clip
-from sidebar import render_sidebar
+from streamlit_app.utils.backend_client import get_clips, get_clip_details, extract_clip
+from streamlit_app.sidebar import render_sidebar
 
 st.set_page_config(page_title="Clips", layout="wide")
 st.title("📋 Clipboard History")
@@ -61,8 +62,8 @@ if not clips:
     st.info("No clips found yet.")
 else:
     # Sort clips by id descending (newest first)
-    sorted_clips = sorted(clips, key=lambda c: c['id'], reverse=True)
-    selected = st.sidebar.selectbox("Select a clip", [f"{c['id']} - {c['summary'][:40]}" for c in sorted_clips])
+    sorted_clips = sorted(clips, key=lambda c: c.id, reverse=True)
+    selected = st.sidebar.selectbox("Select a clip", [f"{c.id} - {c.summary[:40]}" for c in sorted_clips])
     clip_id = int(selected.split(" - ")[0])
     details = get_clip_details(clip_id)
 

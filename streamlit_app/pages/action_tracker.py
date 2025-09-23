@@ -46,15 +46,15 @@ else:
         col.markdown(f"**{header}**")
     # Table rows
     for action in actions:
-        status = action.get('status', 'open')
+        status = action.status if hasattr(action, 'status') else getattr(action, 'status', 'open')
         with st.container():
             cols = st.columns([0.7, 4, 1.5, 2, 1])
             with cols[0]:
                 st.markdown(status_colors.get(status, '❓'))
             with cols[1]:
-                st.markdown(action['description'])
-                if action.get('due_date'):
-                    st.caption(f"Due: {action['due_date']}")
+                st.markdown(action.description)
+                if hasattr(action, 'due_date') and action.due_date:
+                    st.caption(f"Due: {action.due_date}")
             with cols[2]:
                 st.caption(status.replace('_', ' ').title())
             with cols[3]:
@@ -62,12 +62,12 @@ else:
                     "Change Status",  # Non-empty label for accessibility
                     options=['open', 'in_progress', 'done', 'ignored'],
                     index=['open', 'in_progress', 'done', 'ignored'].index(status),
-                    key=f"status_{action['id']}"
+                    key=f"status_{action.id}"
                 )
             with cols[4]:
-                if st.button("Update", key=f"update_{action['id']}"):
+                if st.button("Update", key=f"update_{action.id}"):
                     if new_status != status:
-                        result = update_action_item_status(action['id'], new_status)
+                        result = update_action_item_status(action.id, new_status)
                         if result:
                             st.success(f"Status updated to {new_status.replace('_', ' ').title()}")
                             st.rerun()

@@ -8,6 +8,9 @@ try:
     from src.api.services.process_service import (
         extract_and_create_meeting, extract_and_create_clip, extract_and_create_journal, post_weekly_report_service
     )
+    from src.api.services.rag_service import (
+        ask_question
+    )
     from src.api.services.search_service import search_items_service
     from src.api.services.update_service import update_action_item_status_service
     from src.db.database import SessionLocal
@@ -25,6 +28,9 @@ except ImportError:
     )
     from api.services.process_service import (
         extract_and_create_meeting, extract_and_create_clip, extract_and_create_journal, post_weekly_report_service
+    )
+    from api.services.rag_service import (
+        ask_question
     )
     from api.services.search_service import search_items_service
     from api.services.update_service import update_action_item_status_service
@@ -134,8 +140,4 @@ def search_items(query: str):
 
 def ask_ai(query: str):
     """Ask AI using RAG service - placeholder implementation"""
-    # TODO: Implement proper RAG functionality
-    return {
-        "answer": "RAG functionality needs to be implemented. This is a placeholder response.",
-        "context_used": ["Feature in development"]
-    }
+    return ask_question(query)

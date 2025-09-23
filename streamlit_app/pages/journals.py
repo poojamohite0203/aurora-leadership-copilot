@@ -61,8 +61,8 @@ if not journals:
     st.info("No journals found yet.")
 else:
     # Sort journals by id descending (newest first)
-    sorted_journals = sorted(journals, key=lambda j: j['id'], reverse=True)
-    selected = st.sidebar.selectbox("Select a journal", [f"{j['id']} - {j['summary'][:40]}" for j in sorted_journals])
+    sorted_journals = sorted(journals, key=lambda j: j.id, reverse=True)
+    selected = st.sidebar.selectbox("Select a journal", [f"{j.id} - {j.summary[:40]}" for j in sorted_journals])
     journal_id = int(selected.split(" - ")[0])
     details = get_journal_details(journal_id)
 

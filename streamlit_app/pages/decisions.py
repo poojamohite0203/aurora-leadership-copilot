@@ -46,13 +46,13 @@ else:
         col.markdown(f"**{header}**")
     # Table rows
     for decision in decisions:
-        status = decision.get('status', 'open')
+        status = decision.status if hasattr(decision, 'status') else getattr(decision, 'status', 'open')
         with st.container():
             cols = st.columns([0.7, 4, 1.5, 2, 1])
             with cols[0]:
                 st.markdown(status_colors.get(status, '❓'))
             with cols[1]:
-                st.markdown(decision['description'])
+                st.markdown(decision.description)
             with cols[2]:
                 st.caption(status.replace('_', ' ').title())
             with cols[3]:
@@ -60,12 +60,12 @@ else:
                     "Change Status",  # Non-empty label for accessibility
                     options=['open', 'decided', 'implemented', 'cancelled'],
                     index=['open', 'decided', 'implemented', 'cancelled'].index(status),
-                    key=f"status_{decision['id']}"
+                    key=f"status_{decision.id}"
                 )
             with cols[4]:
-                if st.button("Update", key=f"update_{decision['id']}"):
+                if st.button("Update", key=f"update_{decision.id}"):
                     if new_status != status:
-                        result = update_decision_status(decision['id'], new_status)
+                        result = update_decision_status(decision.id, new_status)
                         if result:
                             st.success(f"Status updated to {new_status.replace('_', ' ').title()}")
                             st.rerun()
