@@ -1,8 +1,5 @@
-# utils/api_client.py
 import requests
 import json
-import requests
-BASE_URL = "http://localhost:8000"  # Change if deployed elsewhere
 
 # -------------------- Meetings --------------------
 def get_meetings():
@@ -152,17 +149,6 @@ def get_weekly_reports():
     if resp.status_code == 200:
         return resp.json()
     return []
-
-def generate_weekly_report(date_str, force_regen: bool = False):
-    """Call backend to generate a weekly report for the week containing the given date (YYYY-MM-DD)."""
-    try:
-        resp = requests.post(f"{BASE_URL}/weekly_report", json={"date": date_str, "force_regen": force_regen})
-        resp.raise_for_status()
-        return resp.json()
-    except requests.RequestException as e:
-        print(f"Error generating weekly report: {e}")
-        return {"error": str(e)}
-
 
 # -------------------- Search & Ask --------------------
 def search_items(query: str):

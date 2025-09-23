@@ -192,13 +192,13 @@ def generate_weekly_report(date, db: Session, force_regen=False):
             return report
 
     # 1. Gather weekly data
-    print(f"WEEK RANGE: {week_start} to {week_end}")
-    print("Meeting dates:", [m.date for m in db.query(models.Meeting).all()])
-    print("Clip dates:", [c.date for c in db.query(models.Clip).all()])
-    print("Journal dates:", [j.date for j in db.query(models.Journal).all()])
-    print("Action item dates:", [ai.date for ai in db.query(models.Action_Item).all()])
-    print("Decision dates:", [d.date for d in db.query(models.Decision).all()])
-    print("Blocker dates:", [b.date for b in db.query(models.Blocker).all()])
+    # print(f"WEEK RANGE: {week_start} to {week_end}")
+    # print("Meeting dates:", [m.date for m in db.query(models.Meeting).all()])
+    # print("Clip dates:", [c.date for c in db.query(models.Clip).all()])
+    # print("Journal dates:", [j.date for j in db.query(models.Journal).all()])
+    # print("Action item dates:", [ai.date for ai in db.query(models.Action_Item).all()])
+    # print("Decision dates:", [d.date for d in db.query(models.Decision).all()])
+    # print("Blocker dates:", [b.date for b in db.query(models.Blocker).all()])
     
     meetings_str = "\n".join([f"- {m.title}: {m.summary}" for m in db.query(models.Meeting).filter(
         models.Meeting.date.between(week_start, week_end))]) or "No meetings this week"
@@ -273,3 +273,23 @@ def extract_summary_from_response(response: str) -> dict:
         return {"summary": "Summary generation failed: Output format invalid or empty."}
     
     return result
+
+def post_weekly_report_service(payload: dict, db):
+    """Generate or fetch a weekly report for the week containing the given date (POST)."""
+    from datetime import datetime
+    from api.services.process_service import generate_weekly_report
+    try:
+        date_str = payload.get("date")
+        force_regen = payload.get("force_regen", False)
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+        report = generate_weekly_report(date_obj, db, force_regen=force_regen)
+        if not report:
+            return {"error": "No report found or generated for the given week."}
+        return {
+            "week_start": report.week_start.strftime("%Y-%m-%d"),
+            "week_end": report.week_end.strftime("%Y-%m-%d"),
+            "summary": report.summary,
+            "created_at": report.created_at
+        }
+    except Exception as e:
+        return {"error": str(e)}

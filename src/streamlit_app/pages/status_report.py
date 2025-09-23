@@ -1,6 +1,6 @@
 import streamlit as st
 from utils.api_client import get_weekly_reports
-from utils.weekly_report_client import generate_weekly_report
+from utils.api_client import generate_weekly_report
 from sidebar import render_sidebar
 import datetime
 

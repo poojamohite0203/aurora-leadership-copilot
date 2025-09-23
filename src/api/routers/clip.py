@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Query, Body
 from api.services.process_service import extract_and_create_clip
+from api.services.get_service import get_all_clips_service, get_clip_details_service
 from sqlalchemy.orm import Session
 from db import crud
 from db.database import get_db
@@ -17,7 +18,7 @@ def get_all_clips(
     Optional limit parameter to control the number of results.
     """
     try:
-        return crud.get_all_clips(db, limit)
+        return get_all_clips_service(db, limit)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -37,13 +38,7 @@ def extract_clip(text: str = Body(..., media_type="text/plain"), db: Session = D
 @router.get("/{id}")
 def get_clip_details(id: int, db: Session = Depends(get_db)):
     """Get a specific clip by ID without nested data"""
-    clip = crud.get_clip_by_id(db, id)
+    clip = get_clip_details_service(db, id)
     if not clip:
         raise HTTPException(status_code=404, detail="Clip not found")
-    
-    return {
-        "id": clip.id,
-        "text": clip.text,
-        "summary": clip.summary,
-        "date": clip.date
-    }
+    return clip

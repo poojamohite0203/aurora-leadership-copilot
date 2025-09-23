@@ -1,3 +1,46 @@
+aurora-leadership-copilot/
+├── src/
+│   ├── api/
+│   │   ├── routers/
+│   │   │   ├── meeting.py
+│   │   │   ├── journal.py
+│   │   │   ├── clip.py
+│   │   │   ├── status_report.py
+│   │   │   └── (other router files...)
+│   │   └── services/
+│   │       ├── process_service.py
+│   │       ├── rag_service.py
+│   │       └── (other service files...)
+│   ├── core/
+│   │   ├── llm_utils.py
+│   │   ├── prompt_templates.py
+│   │   └── (other core files...)
+│   ├── db/
+│   │   ├── models.py
+│   │   ├── database.py
+│   │   ├── crud.py
+│   │   └── (other db files...)
+│   └── streamlit_app/
+│       ├── app.py
+│       ├── config.py
+│       ├── main.py
+│       ├── pages/
+│       │   ├── meetings.py
+│       │   ├── journals.py
+│       │   ├── clips.py
+│       │   ├── status_report.py
+│       │   └── (other Streamlit pages...)
+│       ├── utils/
+│       │   └── (utility files...)
+│       └── (other Streamlit app files...)
+│   └── (other src files...)
+├── .venv/
+│   └── (virtual environment files)
+├── requirements.txt
+├── README.md
+└── (other project files)
+
+
 
 All EndPoints 
 
