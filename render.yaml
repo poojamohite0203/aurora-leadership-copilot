@@ -10,6 +10,9 @@ services:
   - key: RENDER
     value: "true"
   disk:
-    name: aurora-data
-    mountPath: /app/data
-    sizeGB: 1
+    - name: aurora-sqlite
+      mountPath: /app/data
+      sizeGB: 1
+    - name: aurora-chroma
+      mountPath: /app/.chroma
+      sizeGB: 1
