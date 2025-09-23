@@ -1,8 +1,19 @@
 import chromadb
 from sentence_transformers import SentenceTransformer
 
+def get_chroma_client():
+    try:
+        # Try persistent mode (local dev)
+        client = chromadb.PersistentClient(path=".chroma")
+        print("✅ Using persistent Chroma at .chroma")
+    except Exception as e:
+        # Fallback for Streamlit Cloud (ephemeral)
+        print("⚠️ Falling back to in-memory Chroma:", e)
+        client = chromadb.Client()
+    return client
+
 # Persistent Chroma client (saved in .chroma folder)
-client = chromadb.PersistentClient(path=".chroma")
+client = get_chroma_client()
 collection = client.get_or_create_collection("knowledge_base")
 
 # Embedding model
