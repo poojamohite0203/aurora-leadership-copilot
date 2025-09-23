@@ -1,39 +1,59 @@
-import chromadb
-from sentence_transformers import SentenceTransformer
+import os
 
-def get_chroma_client():
-    try:
-        # Try persistent mode (local dev)
-        client = chromadb.PersistentClient(path=".chroma")
-        print("✅ Using persistent Chroma at .chroma")
-    except Exception as e:
-        # Fallback for Streamlit Cloud (ephemeral)
-        print("⚠️ Falling back to in-memory Chroma:", e)
-        client = chromadb.Client()
-    return client
+try:
+    import chromadb
+    from chromadb.config import Settings
 
-# Persistent Chroma client (saved in .chroma folder)
-client = get_chroma_client()
-collection = client.get_or_create_collection("knowledge_base")
+    # Detect if running on Streamlit Cloud
+    ON_STREAMLIT_CLOUD = os.environ.get("STREAMLIT_SERVER") == "true"
 
-# Embedding model
-model = SentenceTransformer("all-MiniLM-L6-v2")
+    if ON_STREAMLIT_CLOUD:
+        # In-memory Chroma (no persistence) for Streamlit Cloud
+        persist_dir = None
+    else:
+        # Local disk persistence
+        persist_dir = "./chromadb"
+
+    client = chromadb.Client(Settings(
+        persist_directory=persist_dir,
+        anonymized_telemetry=False
+    ))
+
+    # Default collection
+    collection = client.get_or_create_collection("default")
+
+except Exception as e:
+    print("⚠️ Chroma not available. Vector DB disabled:", e)
+    client = None
+    collection = None
 
 
 def add_to_index(id: str, text: str, metadata: dict):
-    """Add a document (clip/journal/meeting) to Chroma index"""
-    embedding = model.encode(text).tolist()
-    collection.add(
-        documents=[text],
-        embeddings=[embedding],
-        ids=[id],
-        metadatas=[metadata],
-    )
+    if collection:
+        collection.add(
+            ids=[id],
+            documents=[text],
+            metadatas=[metadata]
+        )
 
+def query_index(query: str, n_results: int = 5):
+    if collection:
+        results = collection.query(
+            query_texts=[query],
+            n_results=n_results
+        )
+        return results
+    return None
 
-def search(query: str, k: int = 5): # Arrive at optimal Number -- Experiment part of guessing on the number -- similarity % -- Overanwer is good than under answer -- filter based on similarity score is great than 0 show it 
-    """Search the vector DB using semantic similarity"""
-    
+def search(query: str, k: int = 5):
+    """Search the vector DB using semantic similarity."""
+    # Get embedding for the query
     embedding = model.encode(query).tolist()
-    results = collection.query(query_embeddings=[embedding], n_results=k)
+    
+    # Query the collection safely
+    results = query_index(query=query, n_results=k)
+    
+    if results is None:
+        return []  # Vector DB unavailable
+    
     return results
