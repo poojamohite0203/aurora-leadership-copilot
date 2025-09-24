@@ -21,40 +21,42 @@ except Exception as e:
     model = None
 
 def add_to_index(id: str, text: str, metadata: dict):
-    from sentence_transformers import SentenceTransformer
-    model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
-    if not model or not collection:
-        print("⚠️ Vector DB not available - skipping indexing")
-        return
+    # from sentence_transformers import SentenceTransformer
+    # model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
+    # if not model or not collection:
+    #     print("⚠️ Vector DB not available - skipping indexing")
+    #     return
     
-    try:
-        embedding = model.encode(text).tolist()
-        collection.add(
-            ids=[id],
-            documents=[text],
-            metadatas=[metadata],
-            embeddings=[embedding]
-        )
-        print(f"✅ Added to index: {id}")
-    except Exception as e:
-        print(f"❌ Error adding to index: {e}")
+    # try:
+    #     embedding = model.encode(text).tolist()
+    #     collection.add(
+    #         ids=[id],
+    #         documents=[text],
+    #         metadatas=[metadata],
+    #         embeddings=[embedding]
+    #     )
+    #     print(f"✅ Added to index: {id}")
+    # except Exception as e:
+    #     print(f"❌ Error adding to index: {e}")
+    print(f"Not adding to index: {e}")
 
 def query_index(query: str, n_results: int = 5):
-    from sentence_transformers import SentenceTransformer
-    model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
-    if not model or not collection:
-        return None
+    # from sentence_transformers import SentenceTransformer
+    # model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
+    # if not model or not collection:
+    #     return None
         
-    try:
-        embedding = model.encode(query).tolist()
-        results = collection.query(
-            query_embeddings=[embedding],
-            n_results=n_results
-        )
-        return results
-    except Exception as e:
-        print(f"❌ Error querying index: {e}")
-        return None
+    # try:
+    #     embedding = model.encode(query).tolist()
+    #     results = collection.query(
+    #         query_embeddings=[embedding],
+    #         n_results=n_results
+    #     )
+    #     return results
+    # except Exception as e:
+    #     print(f"❌ Error querying index: {e}")
+    #     return None
+    return []
 
 def search(query: str, k: int = 5):
     """Search the vector DB using semantic similarity."""
