@@ -3,8 +3,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# --- Use Streamlit secrets for OpenAI API key ---
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 from streamlit_app.utils.backend_client import get_meetings, get_clips, get_journals, get_action_items
 from streamlit_app.sidebar import render_sidebar
