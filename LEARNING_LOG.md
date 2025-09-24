@@ -115,9 +115,10 @@ docker run -p 8501:8501 aurora-copilot
 
 # Run the cntainer with feature for it to rememebr data 
 docker run -p 8501:8501 \
+  -e OPENAI_API_KEY=your-openai-api-key \
   -v $(pwd)/src/db/aurora.db:/app/src/db/aurora.db \
   -v $(pwd)/.chroma:/app/.chroma \
   aurora-copilot
-
+  
 # when you run in docker - your app will be @ http://localhost:8501/
 

@@ -9,10 +9,3 @@ services:
     sync: false  # Set this manually in Render dashboard
   - key: RENDER
     value: "true"
-  disk:
-    - name: aurora-sqlite
-      mountPath: /app/data
-      sizeGB: 1
-    - name: aurora-chroma
-      mountPath: /app/.chroma
-      sizeGB: 1
