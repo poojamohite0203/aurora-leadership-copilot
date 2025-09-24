@@ -5,6 +5,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
+# Initialize database tables (import all models and create tables)
+from src.db.init_db import init_database
+init_database()
+
 from streamlit_app.utils.backend_client import get_meetings, get_clips, get_journals, get_action_items
 from streamlit_app.sidebar import render_sidebar
 

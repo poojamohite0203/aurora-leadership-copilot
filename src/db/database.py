@@ -40,12 +40,10 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Import all models so SQLAlchemy knows about them
-from .models import Meeting, ActionItem, Decision, Blocker, Clip, Journal, WeeklyReport
-
-# Auto-create tables if missing (after models are imported)
-Base.metadata.create_all(bind=engine)
-print("✅ Database tables created/verified")
+def create_tables():
+    """Create all database tables. Call this after importing all models."""
+    Base.metadata.create_all(bind=engine)
+    print("✅ Database tables created/verified")
 
 def get_db():
     db = SessionLocal()
