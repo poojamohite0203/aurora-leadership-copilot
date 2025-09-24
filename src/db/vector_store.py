@@ -38,7 +38,7 @@ def add_to_index(id: str, text: str, metadata: dict):
     #     print(f"✅ Added to index: {id}")
     # except Exception as e:
     #     print(f"❌ Error adding to index: {e}")
-    print(f"Not adding to index: {e}")
+    print("Not adding to index")
 
 def query_index(query: str, n_results: int = 5):
     # from sentence_transformers import SentenceTransformer
