@@ -33,7 +33,7 @@ try:
 
     # Default collection
     collection = client.get_or_create_collection("knowledge_base")
-    model = SentenceTransformer("all-MiniLM-L6-v2")
+    model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
     print("✅ ChromaDB and SentenceTransformer loaded successfully")
 
 except Exception as e:
