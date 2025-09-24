@@ -123,9 +123,8 @@ docker run -p 8501:8501 \
   # to run same way as it run on Render 
   docker run -p 8501:8501 \
   -e OPENAI_API_KEY=your-openai-api-key \
-  -v $(pwd)/src/db/aurora.db:/app/src/db/aurora.db \
-  -v $(pwd)/.chroma:/app/.chroma \
- -v RENDER = true \
+  -e RENDER=true \
+  -e PORT=8501 \
   aurora-copilot
   
 # when you run in docker - your app will be @ http://localhost:8501/

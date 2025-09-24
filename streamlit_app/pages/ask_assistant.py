@@ -1,11 +1,12 @@
 import sys
 import os
 
+# Add project root to Python path FIRST
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 # Initialize database BEFORE any other imports
 from streamlit_app.utils.db_init import ensure_db_initialized
 ensure_db_initialized()
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 import streamlit as st
 from streamlit_app.utils.backend_client import ask_ai

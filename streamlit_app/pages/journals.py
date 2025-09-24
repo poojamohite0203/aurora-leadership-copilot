@@ -1,14 +1,16 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-import streamlit as st
-from streamlit_app.utils.backend_client import get_journals, get_journal_details, extract_journal
-from sidebar import render_sidebar
 
+# Add project root to Python path FIRST
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Initialize database BEFORE any other imports
 from streamlit_app.utils.db_init import ensure_db_initialized
 ensure_db_initialized()
+
+import streamlit as st
+from streamlit_app.utils.backend_client import get_journals, get_journal_details, extract_journal
+from streamlit_app.sidebar import render_sidebar
 
 
 st.set_page_config(page_title="Journals", layout="wide")
