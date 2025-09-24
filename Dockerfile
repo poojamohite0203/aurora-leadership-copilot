@@ -30,7 +30,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Run Streamlit with Render.com configuration
 CMD streamlit run streamlit_app/app.py \
-    --server.port=8501 \
+    --server.port=$PORT \
     --server.address=0.0.0.0 \
     --server.headless=true \
     --server.enableCORS=false \
