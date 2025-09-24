@@ -3,31 +3,12 @@ try:
     import chromadb
     from chromadb.config import Settings
 
-    # Detect deployment environment
-    IS_RENDER = os.environ.get("RENDER") is not None
-    IS_STREAMLIT_CLOUD = "/mount/src" in os.getcwd()
-    
-    if IS_RENDER:
-        # Render.com - use persistent disk storage in /app/data
-        persist_dir = "/app/data/.chroma"
-        os.makedirs(persist_dir, exist_ok=True)
-        print(f"🚀 Render.com - ChromaDB persist directory: {persist_dir}")
-        client = chromadb.PersistentClient(path=persist_dir)
-        
-    elif IS_STREAMLIT_CLOUD:
-        # Streamlit Cloud - in-memory only
-        print("☁️ Streamlit Cloud - using in-memory vector store")
-        client = chromadb.Client(Settings(
-            persist_directory=None,
-            anonymized_telemetry=False
-        ))
-        
-    else:
-        # Local development with persistence
-        project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        persist_dir = os.path.join(project_root, ".chroma")
-        print(f"💻 Local development - ChromaDB persist directory: {persist_dir}")
-        client = chromadb.PersistentClient(path=persist_dir)
+    # Always use in-memory vector store (no persistence)
+    print("🗑️ Using in-memory ChromaDB (no persistence, data lost on restart)")
+    client = chromadb.Client(Settings(
+        persist_directory=None,
+        anonymized_telemetry=False
+    ))
 
     # Default collection
     collection = client.get_or_create_collection("knowledge_base")

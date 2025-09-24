@@ -2,19 +2,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 
-# Render.com detection and database path
-IS_RENDER = os.environ.get("RENDER") is not None
-IS_LOCAL = not IS_RENDER
-
-if IS_RENDER:
-    # Render.com - use persistent disk storage
-    DB_PATH = "/app/data/aurora.db"
-    print("🚀 Running on Render.com - using persistent database")
-else:
-    # Local development
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    DB_PATH = os.path.join(BASE_DIR, "aurora.db")
-    print("💻 Local development mode")
+# Use environment variable for DB path, default to /app/data/aurora.db
+DB_PATH = os.environ.get("DB_PATH", "/app/data/aurora.db")
 
 # Ensure directory exists
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
