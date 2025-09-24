@@ -31,7 +31,6 @@ try:
 
     # Default collection
     collection = client.get_or_create_collection("knowledge_base")
-    model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
     print("✅ ChromaDB and SentenceTransformer loaded successfully")
 
 except Exception as e:
@@ -42,6 +41,7 @@ except Exception as e:
 
 def add_to_index(id: str, text: str, metadata: dict):
     from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
     if not model or not collection:
         print("⚠️ Vector DB not available - skipping indexing")
         return
@@ -59,6 +59,8 @@ def add_to_index(id: str, text: str, metadata: dict):
         print(f"❌ Error adding to index: {e}")
 
 def query_index(query: str, n_results: int = 5):
+    from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
     if not model or not collection:
         return None
         

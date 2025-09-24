@@ -31,7 +31,7 @@ def query_gpt(prompt: str, model: str = "gpt-4.1-nano") -> str:
         # Extract the assistant's reply
         return response.choices[0].message.content.strip()
     except Exception as e:
-        print(f"Error calling OpenAI API: {e}")
+        # print(f"Error calling OpenAI API: {e}")
         raise
 
 def validate_llm_output(data: dict, required_fields: list) -> bool:
@@ -91,26 +91,26 @@ def validate_llm_summary_output(
     """
     # print("LLM Response:", extracted)
     if "raw_output" in extracted:
-        print(f"LLM extraction failed for {context}")
+        # print(f"LLM extraction failed for {context}")
         raise ValueError(f"LLM extraction failed for {context}")
     if not validate_llm_output(extracted, required_fields):
-        print(f"LLM output format invalid for {context}")
+        # print(f"LLM output format invalid for {context}")
         raise ValueError(f"LLM output format invalid for {context}")
     
     summary = extracted.get("summary", "")
 
     if not is_content_length_valid(summary):
-        print(f"LLM output content invalid for {context}")
+        # print(f"LLM output content invalid for {context}")
         raise ValueError(f"LLM output content invalid for {context}")
     if not is_content_safe(summary):
-        print(f"LLM output flagged as unsafe for {context}")
+        # print(f"LLM output flagged as unsafe for {context}")
         raise ValueError(f"LLM output flagged as unsafe for {context}")
     if not detect_hallucination(summary, context):
-        print(f"LLM output may contain hallucinated facts for {context}")
+        # print(f"LLM output may contain hallucinated facts for {context}")
         raise ValueError(f"LLM output may contain hallucinated facts for {context}")
     ok, categories = check_moderation(summary)
     if not ok:
-         print(f"LLM output blocked due to: {categories}")
+        #  print(f"LLM output blocked due to: {categories}")
          raise ValueError(f"LLM output blocked due to: {categories}")
         
     return sanitize_llm_input_output(summary)
@@ -152,7 +152,7 @@ def extract_json_from_llm_response(response: str) -> dict:
     Extract JSON from LLM response that may be wrapped in fenced code blocks.
     Returns parsed JSON dict or {"raw_output": response} if extraction fails.
     """
-    print("Before Extracting response", response)
+    # print("Before Extracting response", response)
 
     if not isinstance(response, str):
         return {"raw_output": str(response)}
@@ -188,6 +188,6 @@ def extract_json_from_llm_response(response: str) -> dict:
     try:
         return json.loads(json_str)
     except json.JSONDecodeError as e:
-        print(f"JSON decode error: {e}")
-        print(f"Attempted to parse: {json_str[:500]}...")
+        # print(f"JSON decode error: {e}")
+        # print(f"Attempted to parse: {json_str[:500]}...")
         return {"raw_output": response}
