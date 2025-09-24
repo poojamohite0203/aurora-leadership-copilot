@@ -1,6 +1,4 @@
 import os
-from sentence_transformers import SentenceTransformer
-
 try:
     import chromadb
     from chromadb.config import Settings
@@ -43,6 +41,7 @@ except Exception as e:
     model = None
 
 def add_to_index(id: str, text: str, metadata: dict):
+    from sentence_transformers import SentenceTransformer
     if not model or not collection:
         print("⚠️ Vector DB not available - skipping indexing")
         return
