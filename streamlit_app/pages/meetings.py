@@ -1,6 +1,11 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+# Initialize database BEFORE any imports that might query it
+from streamlit_app.utils.db_init import ensure_db_initialized
+ensure_db_initialized()
+
 import streamlit as st
 from streamlit_app.utils.backend_client import get_meetings, get_meeting_details, extract_meeting
 from sidebar import render_sidebar

@@ -6,6 +6,12 @@ from streamlit_app.utils.backend_client import get_blockers, update_blocker_stat
 from sidebar import render_sidebar
 import pandas as pd
 
+
+# Initialize database BEFORE any other imports
+from streamlit_app.utils.db_init import ensure_db_initialized
+ensure_db_initialized()
+
+
 st.set_page_config(page_title="Blockers", layout="wide")
 render_sidebar()
 st.title("⛔ Blockers")

@@ -5,6 +5,12 @@ import streamlit as st
 from streamlit_app.utils.backend_client import get_journals, get_journal_details, extract_journal
 from sidebar import render_sidebar
 
+
+# Initialize database BEFORE any other imports
+from streamlit_app.utils.db_init import ensure_db_initialized
+ensure_db_initialized()
+
+
 st.set_page_config(page_title="Journals", layout="wide")
 st.title("📔 Journals")
 
