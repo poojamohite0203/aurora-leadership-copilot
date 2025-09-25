@@ -1,18 +1,37 @@
 import os
+from openai import OpenAI
 try:
     import chromadb
     from chromadb.config import Settings
 
-    # Always use in-memory vector store (no persistence)
-    print("🗑️ Using in-memory ChromaDB (no persistence, data lost on restart)")
-    client = chromadb.Client(Settings(
-        persist_directory=None,
-        anonymized_telemetry=False
-    ))
+    # Use environment variable for ChromaDB persist directory
+    persist_dir = os.environ.get("CHROMA_DIR", "/app/data/.chroma")
+    IS_RENDER = os.environ.get("RENDER") is not None
+    IS_STREAMLIT_CLOUD = "/mount/src" in os.getcwd()
+    
+    if IS_RENDER:
+        # Render.com - use persistent disk storage
+        os.makedirs(persist_dir, exist_ok=True)
+        print(f"🚀 Render.com - ChromaDB persist directory: {persist_dir}")
+        client = chromadb.PersistentClient(path=persist_dir)
+        
+    elif IS_STREAMLIT_CLOUD:
+        # Streamlit Cloud - in-memory only
+        print("☁️ Streamlit Cloud - using in-memory vector store")
+        client = chromadb.Client(Settings(
+            persist_directory=None,
+            anonymized_telemetry=False
+        ))
+        
+    else:
+        # Local development with persistence
+        os.makedirs(persist_dir, exist_ok=True)
+        print(f"💻 Local development - ChromaDB persist directory: {persist_dir}")
+        client = chromadb.PersistentClient(path=persist_dir)
 
     # Default collection
     collection = client.get_or_create_collection("knowledge_base")
-    print("✅ ChromaDB and SentenceTransformer loaded successfully")
+    print("✅ ChromaDB loaded successfully")
 
 except Exception as e:
     print(f"⚠️ ChromaDB not available. Vector search disabled: {e}")
@@ -20,61 +39,50 @@ except Exception as e:
     collection = None
     model = None
 
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def get_openai_embedding(text):
+    try:
+        response = client.embeddings.create(
+            input=text,
+            model="text-embedding-ada-002"
+        )
+        return response.data[0].embedding
+    except Exception as e:
+        print(f"❌ Error getting OpenAI embedding: {e}")
+        return None
+
 def add_to_index(id: str, text: str, metadata: dict):
-    # from sentence_transformers import SentenceTransformer
-    # model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
-    # if not model or not collection:
-    #     print("⚠️ Vector DB not available - skipping indexing")
-    #     return
-    
-    # try:
-    #     embedding = model.encode(text).tolist()
-    #     collection.add(
-    #         ids=[id],
-    #         documents=[text],
-    #         metadatas=[metadata],
-    #         embeddings=[embedding]
-    #     )
-    #     print(f"✅ Added to index: {id}")
-    # except Exception as e:
-    #     print(f"❌ Error adding to index: {e}")
-    print("Not adding to index")
+    embedding = get_openai_embedding(text)
+    if not embedding or not collection:
+        print("⚠️ Vector DB not available or embedding failed - skipping indexing")
+        return
+    try:
+        collection.add(
+            ids=[id],
+            documents=[text],
+            metadatas=[metadata],
+            embeddings=[embedding]
+        )
+        print(f"✅ Added to index: {id}")
+    except Exception as e:
+        print(f"❌ Error adding to index: {e}")
 
 def query_index(query: str, n_results: int = 5):
-    # from sentence_transformers import SentenceTransformer
-    # model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
-    # if not model or not collection:
-    #     return None
-        
-    # try:
-    #     embedding = model.encode(query).tolist()
-    #     results = collection.query(
-    #         query_embeddings=[embedding],
-    #         n_results=n_results
-    #     )
-    #     return results
-    # except Exception as e:
-    #     print(f"❌ Error querying index: {e}")
-    #     return None
-    return []
+    embedding = get_openai_embedding(query)
+    if not embedding or not collection:
+        return None
+    try:
+        results = collection.query(
+            query_embeddings=[embedding],
+            n_results=n_results
+        )
+        return results
+    except Exception as e:
+        print(f"❌ Error querying index: {e}")
+        return None
 
 def search(query: str, k: int = 5):
     """Search the vector DB using semantic similarity."""
-
-    # Debugging 
-    # try:
-    #     # List all collections
-    #     collections = client.list_collections()
-    #     print(f"Available collections: {[c.name for c in collections]}")
-        
-    #     # Check ALL collections for data
-    #     for coll in collections:
-    #         count = coll.count()
-    #         print(f"Collection '{coll.name}' has {count} items")
-            
-    # except Exception as e:
-    #     print(f"Debug error: {e}")
-
-    # Query the collection safely
     results = query_index(query=query, n_results=k)
     return results if results else []
