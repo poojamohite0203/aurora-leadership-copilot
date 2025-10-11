@@ -71,8 +71,11 @@ if not clips:
     st.info("No clips found yet.")
 else:
     # Sort clips by id descending (newest first)
-    sorted_clips = sorted(clips, key=lambda c: c.id, reverse=True)
-    selected = st.sidebar.selectbox("Select a clip", [f"{c.id} - {c.summary[:40]}" for c in sorted_clips])
+    sorted_clips = sorted(clips, key=lambda c: c.get('id', getattr(c, 'id', 0)), reverse=True)
+    selected = st.sidebar.selectbox(
+        "Select a clip",
+        [f"{c.get('id', getattr(c, 'id', '') )} - {c.get('summary', getattr(c, 'summary', ''))[:40]}" for c in sorted_clips]
+    )
     clip_id = int(selected.split(" - ")[0])
     details = get_clip_details(clip_id)
 
@@ -81,6 +84,5 @@ else:
     st.write(f"**Summary:** {details.get('summary', '')}")
     st.write("📝 Full Text")
     st.write(details.get("text", ""))
-    for clip in clips:
-        clip_id = clip.get('id', None) if isinstance(clip, dict) else getattr(clip, 'id', None)
-        title = clip.get('title', '') if isinstance(clip, dict) else getattr(clip, 'title', '')
+    for clip in sorted_clips:
+        summary = clip.get('summary', getattr(clip, 'summary', ''))

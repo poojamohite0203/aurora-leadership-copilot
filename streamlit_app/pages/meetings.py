@@ -121,5 +121,4 @@ else:
             st.write("No blockers.")
 
 for meeting in meetings:
-    meeting_id = meeting.get('id', None) if isinstance(meeting, dict) else getattr(meeting, 'id', None)
-    title = meeting.get('title', '') if isinstance(meeting, dict) else getattr(meeting, 'title', '')
+    title = meeting.get('title', getattr(meeting, 'title', ''))

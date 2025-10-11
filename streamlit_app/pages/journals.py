@@ -72,8 +72,11 @@ if not journals:
     st.info("No journals found yet.")
 else:
     # Sort journals by id descending (newest first)
-    sorted_journals = sorted(journals, key=lambda j: j.id, reverse=True)
-    selected = st.sidebar.selectbox("Select a journal", [f"{j.id} - {j.summary[:40]}" for j in sorted_journals])
+    sorted_journals = sorted(journals, key=lambda j: j.get('id', getattr(j, 'id', 0)), reverse=True)
+    selected = st.sidebar.selectbox(
+        "Select a journal",
+        [f"{j.get('id', getattr(j, 'id', ''))} - {j.get('summary', getattr(j, 'summary', ''))[:40]}" for j in sorted_journals]
+    )
     journal_id = int(selected.split(" - ")[0])
     details = get_journal_details(journal_id)
 
@@ -92,6 +95,5 @@ else:
     with st.expander("🎭 Themes"):
         st.write(details.get("theme", "N/A"))
 
-for journal in journals:
-    journal_id = journal.get('id', None) if isinstance(journal, dict) else getattr(journal, 'id', None)
-    title = journal.get('title', '') if isinstance(journal, dict) else getattr(journal, 'title', '')
+for journal in sorted_journals:
+    text = journal.get('text', getattr(journal, 'text', ''))

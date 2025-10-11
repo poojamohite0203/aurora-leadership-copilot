@@ -58,9 +58,9 @@ else:
         col.markdown(f"**{header}**")
     # Table rows
     for blocker in blockers:
-        status = blocker.get('status', 'open') if isinstance(blocker, dict) else getattr(blocker, 'status', 'open')
-        description = blocker.get('description', '') if isinstance(blocker, dict) else getattr(blocker, 'description', '')
-        blocker_id = blocker.get('id', None) if isinstance(blocker, dict) else getattr(blocker, 'id', None)
+        status = blocker.get('status', getattr(blocker, 'status', 'open'))
+        description = blocker.get('description', getattr(blocker, 'description', ''))
+        blocker_id = blocker.get('id', getattr(blocker, 'id', None))
         with st.container():
             cols = st.columns([0.7, 4, 1.5, 2, 1])
             with cols[0]:

@@ -54,17 +54,18 @@ else:
         col.markdown(f"**{header}**")
     # Table rows
     for action_item in actions:
-        status = action_item.get('status', 'open') if isinstance(action_item, dict) else getattr(action_item, 'status', 'open')
-        description = action_item.get('description', '') if isinstance(action_item, dict) else getattr(action_item, 'description', '')
-        action_item_id = action_item.get('id', None) if isinstance(action_item, dict) else getattr(action_item, 'id', None)
+        status = action_item.get('status', getattr(action_item, 'status', 'open'))
+        description = action_item.get('description', getattr(action_item, 'description', ''))
+        action_item_id = action_item.get('id', getattr(action_item, 'id', None))
+        due_date = action_item.get('due_date', getattr(action_item, 'due_date', None))
         with st.container():
             cols = st.columns([0.7, 4, 1.5, 2, 1])
             with cols[0]:
                 st.markdown(status_colors.get(status, '❓'))
             with cols[1]:
                 st.markdown(description)
-                if hasattr(action_item, 'due_date') and action_item.due_date:
-                    st.caption(f"Due: {action_item.due_date}")
+                if due_date:
+                    st.caption(f"Due: {due_date}")
             with cols[2]:
                 st.caption(status.replace('_', ' ').title())
             with cols[3]:

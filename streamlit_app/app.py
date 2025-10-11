@@ -56,13 +56,13 @@ with col2:
 with col3:
     st.metric("Latest Clips", len(clips))
     if clips:
-        st.write(f"📝 {clips[-1].summary[:50]}...")
+        st.write(f"📝 {clips[-1].get('summary', '')[:50]}...")
     st.page_link("pages/clips.py", label="View Clips")
 
 with col4:
     if journals:
         st.metric("Latest Journal", len(journals))
-        st.write(f"📔 {journals[-1].text[:50]}...")
+        st.write(f"📔 {journals[-1].get('text', getattr(journals[-1], 'text', ''))[:50]}...")
     else:
         st.metric("Latest Journal", 0)
     st.page_link("pages/journals.py", label="View Journals")
