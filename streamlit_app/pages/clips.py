@@ -1,15 +1,18 @@
 import sys
 import os
+import streamlit as st
 
 # Add project root to Python path FIRST
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Initialize database BEFORE any other imports
 from streamlit_app.utils.db_init import ensure_db_initialized
-ensure_db_initialized()
+if "db_initialized" not in st.session_state:
+    ensure_db_initialized()
+    st.session_state["db_initialized"] = True
 
 import streamlit as st
-from streamlit_app.utils.backend_client import get_clips, get_clip_details, extract_clip
+from streamlit_app.utils.api_client import get_clips, get_clip_details, extract_clip
 from streamlit_app.sidebar import render_sidebar
 
 st.set_page_config(page_title="Clips", layout="wide")
@@ -78,3 +81,6 @@ else:
     st.write(f"**Summary:** {details.get('summary', '')}")
     st.write("📝 Full Text")
     st.write(details.get("text", ""))
+    for clip in clips:
+        clip_id = clip.get('id', None) if isinstance(clip, dict) else getattr(clip, 'id', None)
+        title = clip.get('title', '') if isinstance(clip, dict) else getattr(clip, 'title', '')

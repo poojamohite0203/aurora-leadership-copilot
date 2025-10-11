@@ -4,7 +4,9 @@ import re
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+from langsmith import traceable  # LangSmith tracing
 
+@traceable
 def query_ollama(prompt: str, model: str = "llama3.1"):
     result = subprocess.run(
         ["ollama", "run", model],
@@ -13,6 +15,7 @@ def query_ollama(prompt: str, model: str = "llama3.1"):
     )
     return result.stdout.decode("utf-8")
 
+@traceable
 def query_gpt(prompt: str, model: str = "gpt-4.1-nano") -> str:
     """
     Query OpenAI's GPT model using the same API key as check_moderation.
@@ -134,6 +137,7 @@ def detect_hallucination(output: str, context: str) -> bool:
     # TODO: Implement entity matching or more advanced checks
     return True
 
+@traceable
 def check_moderation(text: str):
     load_dotenv()
     import os

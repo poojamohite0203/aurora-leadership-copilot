@@ -1,15 +1,18 @@
 import sys
 import os
+import streamlit as st
 
 # Add project root to Python path FIRST
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Initialize database BEFORE any other imports
 from streamlit_app.utils.db_init import ensure_db_initialized
-ensure_db_initialized()
+if "db_initialized" not in st.session_state:
+    ensure_db_initialized()
+    st.session_state["db_initialized"] = True
 
 import streamlit as st
-from streamlit_app.utils.backend_client import get_journals, get_journal_details, extract_journal
+from streamlit_app.utils.api_client import get_journals, get_journal_details, extract_journal
 from streamlit_app.sidebar import render_sidebar
 
 
@@ -88,3 +91,7 @@ else:
 
     with st.expander("🎭 Themes"):
         st.write(details.get("theme", "N/A"))
+
+for journal in journals:
+    journal_id = journal.get('id', None) if isinstance(journal, dict) else getattr(journal, 'id', None)
+    title = journal.get('title', '') if isinstance(journal, dict) else getattr(journal, 'title', '')

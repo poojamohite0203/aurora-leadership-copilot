@@ -1,13 +1,16 @@
 # Essential dependencies for Aurora Leadership Copilot
-fastapi==0.116.1
-streamlit==1.49.1
-SQLAlchemy==2.0.43
-python-dotenv==1.1.1
-chromadb>0.5.5
-sentence-transformers==5.1.0
-openai==1.108.1
-pytest==8.4.2
-uvicorn==0.35.0
+fastapi
+streamlit
+SQLAlchemy
+python-dotenv
+chromadb
+sentence-transformers
+openai>=1.104.2,<2.0.0
+pytest
+uvicorn
 tiktoken
-pydantic==2.11.9
-numpy<2
+pydantic
+numpy
+langsmith
+watchdog
+streamlit

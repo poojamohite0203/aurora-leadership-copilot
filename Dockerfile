@@ -3,6 +3,12 @@ FROM python:3.10-slim
 # Set working directory
 WORKDIR /app
 
+# VOLUMES:
+#   - ./data:/app/data
+
+# environment:
+#    DB_PATH=/app/data/aurora.db
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \

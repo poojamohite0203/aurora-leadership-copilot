@@ -9,7 +9,7 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 from src.db.init_db import init_database
 init_database()
 
-from streamlit_app.utils.backend_client import get_meetings, get_clips, get_journals, get_action_items
+from streamlit_app.utils.api_client import get_meetings, get_clips, get_journals, get_action_items
 from streamlit_app.sidebar import render_sidebar
 
 st.set_page_config(page_title="AI Productivity Dashboard", layout="wide")

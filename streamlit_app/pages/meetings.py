@@ -1,13 +1,17 @@
 import sys
 import os
+import streamlit as st
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Initialize database BEFORE any imports that might query it
 from streamlit_app.utils.db_init import ensure_db_initialized
-ensure_db_initialized()
+if "db_initialized" not in st.session_state:
+    ensure_db_initialized()
+    st.session_state["db_initialized"] = True
 
 import streamlit as st
-from streamlit_app.utils.backend_client import get_meetings, get_meeting_details, extract_meeting
+from streamlit_app.utils.api_client import get_meetings, get_meeting_details, extract_meeting
 from sidebar import render_sidebar
 
 st.set_page_config(page_title="Meetings", layout="wide")
@@ -115,3 +119,7 @@ else:
                 st.write(f"- {description}")
         else:
             st.write("No blockers.")
+
+for meeting in meetings:
+    meeting_id = meeting.get('id', None) if isinstance(meeting, dict) else getattr(meeting, 'id', None)
+    title = meeting.get('title', '') if isinstance(meeting, dict) else getattr(meeting, 'title', '')

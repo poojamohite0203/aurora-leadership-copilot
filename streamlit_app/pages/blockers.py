@@ -1,15 +1,18 @@
 import sys
 import os
+import streamlit as st
 
 # Add project root to Python path FIRST
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 # Initialize database BEFORE any other imports
 from streamlit_app.utils.db_init import ensure_db_initialized
-ensure_db_initialized()
+if "db_initialized" not in st.session_state:
+    ensure_db_initialized()
+    st.session_state["db_initialized"] = True
 
 import streamlit as st
-from streamlit_app.utils.backend_client import get_blockers, update_blocker_status
+from streamlit_app.utils.api_client import get_blockers, update_blocker_status
 from streamlit_app.sidebar import render_sidebar
 import pandas as pd
 
@@ -55,13 +58,15 @@ else:
         col.markdown(f"**{header}**")
     # Table rows
     for blocker in blockers:
-        status = blocker.status if hasattr(blocker, 'status') else getattr(blocker, 'status', 'open')
+        status = blocker.get('status', 'open') if isinstance(blocker, dict) else getattr(blocker, 'status', 'open')
+        description = blocker.get('description', '') if isinstance(blocker, dict) else getattr(blocker, 'description', '')
+        blocker_id = blocker.get('id', None) if isinstance(blocker, dict) else getattr(blocker, 'id', None)
         with st.container():
             cols = st.columns([0.7, 4, 1.5, 2, 1])
             with cols[0]:
                 st.markdown(status_colors.get(status, '❓'))
             with cols[1]:
-                st.markdown(blocker.description)
+                st.markdown(description)
             with cols[2]:
                 st.caption(status.replace('_', ' ').title())
             with cols[3]:
@@ -69,12 +74,12 @@ else:
                     "Change Status",  # Non-empty label for accessibility
                     options=['open', 'in_progress', 'resolved', 'escalated', 'ignored'],
                     index=['open', 'in_progress', 'resolved', 'escalated', 'ignored'].index(status),
-                    key=f"status_{blocker.id}"
+                    key=f"status_{blocker_id}"
                 )
             with cols[4]:
-                if st.button("Update", key=f"update_{blocker.id}"):
+                if st.button("Update", key=f"update_{blocker_id}"):
                     if new_status != status:
-                        result = update_blocker_status(blocker.id, new_status)
+                        result = update_blocker_status(blocker_id, new_status)
                         if result:
                             st.success(f"Status updated to {new_status.replace('_', ' ').title()}")
                             st.rerun()

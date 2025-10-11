@@ -1,11 +1,15 @@
+# Ensure environment variables are loaded for both local and Docker
+from dotenv import load_dotenv
+load_dotenv()
 import os
 from openai import OpenAI
+from langsmith import traceable
 try:
     import chromadb
     from chromadb.config import Settings
 
     # Use environment variable for ChromaDB persist directory
-    persist_dir = os.environ.get("CHROMA_DIR", "/app/data/.chroma")
+    persist_dir = os.environ.get("CHROMA_DIR", "./data/.chroma")  # Use relative path by default
     IS_RENDER = os.environ.get("RENDER") is not None
     IS_STREAMLIT_CLOUD = "/mount/src" in os.getcwd()
     
@@ -39,11 +43,15 @@ except Exception as e:
     collection = None
     model = None
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
+# Load OpenAI API key from environment
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise RuntimeError("OPENAI_API_KEY not set. Check your .env or environment variables.")
+openai_client = OpenAI(api_key=api_key)
+@traceable
 def get_openai_embedding(text):
     try:
-        response = client.embeddings.create(
+        response = openai_client.embeddings.create(
             input=text,
             model="text-embedding-ada-002"
         )
@@ -51,7 +59,7 @@ def get_openai_embedding(text):
     except Exception as e:
         print(f"❌ Error getting OpenAI embedding: {e}")
         return None
-
+@traceable
 def add_to_index(id: str, text: str, metadata: dict):
     embedding = get_openai_embedding(text)
     if not embedding or not collection:
@@ -67,7 +75,7 @@ def add_to_index(id: str, text: str, metadata: dict):
         print(f"✅ Added to index: {id}")
     except Exception as e:
         print(f"❌ Error adding to index: {e}")
-
+@traceable
 def query_index(query: str, n_results: int = 5):
     embedding = get_openai_embedding(query)
     if not embedding or not collection:

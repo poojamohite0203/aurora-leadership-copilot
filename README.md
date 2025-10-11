@@ -37,7 +37,7 @@ python3 -m pytest --capture=no # to display print on terminal from test cases
 python3 -m pytest --capture=no --disable-warnings # to disable warnings
 
 ### Run the application
-    #Activate your virtual environment (if not already):
+    #Activate your virtual environment (if not already): - python3 -m venv .venv
         source .venv/bin/activate
     #Install requirements:
         pip install -r requirements.txt
@@ -45,7 +45,7 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
         OPENAI_API_KEY=your-api-key # if the file doesn't exists please add it under main project same level as data directory
     #Run your FastAPI app from your project root:
         uvicorn main:app --reload --app-dir src
-
+    ## Swagger available at http://127.0.0.1:8000/docs
 --- 
 ```   
 

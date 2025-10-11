@@ -5,7 +5,7 @@
     ### Code Snippets / Commands
     ```python
     # Example: creating a virtual environment
-    python -m venv 
+    python -m venv .venv
 
     ### Activating the virtual environment
     **On macOS / Linux:**
@@ -128,4 +128,67 @@ docker run -p 8501:8501 \
   aurora-copilot
   
 # when you run in docker - your app will be @ http://localhost:8501/
+
+---
+
+## LangSmith Introduction & Setup
+
+**LangSmith** is an observability and evaluation platform for LLM applications (by LangChain). It allows you to:
+- Trace and visualize LLM calls, chains, and data flows
+- Run automated evals on LLM outputs (quality, safety, correctness, etc.)
+- Debug, monitor, and improve LLM-powered apps
+
+### Setup Steps
+1. **Install the SDK**
+   - Add `langsmith` to your `requirements.txt` 
+2. **Set Environment Variables**
+   - `LANGCHAIN_TRACING_V2=true`
+   - `LANGCHAIN_API_KEY=your-langsmith-api-key`
+   - (Optional) `LANGCHAIN_ENDPOINT=https://api.smith.langchain.com`
+3. **Instrument Your Code**
+   - Use the `@traceable` decorator from `langsmith` on any function you want to trace:
+     ```python
+     from langsmith import traceable
+     @traceable
+     def my_function(...):
+         ...
+     ```
+4. **Write and Upload Evals**
+   - Create eval classes (see `langsmith_evals.py` in this repo)
+   - Upload them in the LangSmith dashboard to automate quality checks
+
+### Example Evals Implemented
+- **SummaryNotEmptyEval**: Checks that the summary field is present and not empty
+- **OutputIsValidJSONEval**: Checks that the output is valid JSON
+- **ContentSafetyEval**: Checks for unsafe content (profanity, hate speech, etc.)
+- **SemanticSimilarityEval**: Checks semantic similarity to a reference answer using OpenAI embeddings
+
+### Usage Notes
+- For local dev, use a `.env` file in your project root
+- For cloud (Render, etc.), set env vars in the dashboard
+- All `@traceable`-decorated functions will be logged in LangSmith
+- Evals can be run on any run or chain in the LangSmith UI
+
+### Running Local LangSmith Evals
+
+To run your evals locally and publish results to LangSmith:
+
+1. Make sure your `.env` file is set up with your LangSmith and OpenAI keys.
+2. Install all dependencies (including `langsmith`, `openai`, `dotenv`, `openevals`, etc.).
+3. Run the eval script from your project root:
+
+   ```sh
+   python run_langsmith_evals.py
+   ```
+
+This will execute your evals (see `langsmith_evals.py`), print results, and publish them to your LangSmith dashboard.
+
+### To run Evlas locally:
+- For local running evlas : pip install -U langsmith openevals openai
+        export LANGSMITH_TRACING="true"
+        export LANGSMITH_ENDPOINT="https://api.smith.langchain.com"
+        export LANGSMITH_API_KEY="<your-langsmith-api-key>"
+        export OPENAI_API_KEY="<your-openai-api-key>"
+
+---
 

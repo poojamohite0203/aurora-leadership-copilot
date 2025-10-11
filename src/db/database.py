@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 
 # Use environment variable for DB path, default to /app/data/aurora.db
-DB_PATH = os.environ.get("DB_PATH", "/app/data/aurora.db")
+DB_PATH = os.environ.get("DB_PATH", "./data/aurora.db")  # Use relative path by default
 
 # Ensure directory exists
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
