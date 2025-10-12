@@ -36,7 +36,9 @@ OR
 python3 -m pytest --capture=no # to display print on terminal from test cases
 python3 -m pytest --capture=no --disable-warnings # to disable warnings
 
-### Run the application
+### Run the application 
+##locally
+
     #Activate your virtual environment (if not already): - python3 -m venv .venv
         source .venv/bin/activate
     #Install requirements:
@@ -46,6 +48,7 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
     #Run your FastAPI app from your project root:
         uvicorn main:app --reload --app-dir src
     ## Swagger available at http://127.0.0.1:8000/docs
+
 --- 
 ```   
 
@@ -57,6 +60,41 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
         pip install -r requirements.txt
     # Will render on http://localhost:8501
         streamlit run streamlit_app/app.py
+
+## 🚀 Run FastAPI Backend with Docker
+
+1. Build the backend image:
+   ```bash
+   docker build -f Dockerfile.backend -t aurora-backend .
+   ```
+2. Run the backend container:
+   ```bash
+   docker run -p 8000:8000 -e OPENAI_API_KEY=your-api-key aurora-backend
+   ```
+   - Access FastAPI at: http://localhost:8000
+   - Swagger docs: http://localhost:8000/docs
+
+## 🚀 Run Streamlit Frontend with Docker
+
+1. Build the frontend image:
+   ```bash
+   docker build -f Dockerfile.frontend -t aurora-frontend .
+   ```
+2. Run the frontend container:
+   ```bash
+   docker run -p 8501:8501 aurora-frontend
+   ```
+   - Access Streamlit UI at: http://localhost:8501
+
+## 🐳 Run Both with Docker Compose (Recommended for Local)
+
+1. Start both services:
+   ```bash
+   docker-compose up --build
+   ```
+2. Access:
+   - FastAPI: http://localhost:8000
+   - Streamlit: http://localhost:8501
 
 ## API's
     /search

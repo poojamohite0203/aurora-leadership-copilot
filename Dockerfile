@@ -1,3 +1,8 @@
+# This Dockerfile is deprecated. Use Dockerfile.backend for FastAPI backend and Dockerfile.frontend for Streamlit frontend.
+# See docker-compose.yml for local multi-service setup.
+
+# If you need a single-service Dockerfile, copy the relevant Dockerfile.backend or Dockerfile.frontend here.
+
 FROM python:3.10-slim
 
 # Set working directory
