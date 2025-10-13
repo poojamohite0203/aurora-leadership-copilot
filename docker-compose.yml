@@ -10,6 +10,7 @@ services:
       - ./data:/app/data
     environment:
       - DB_PATH=/app/data/aurora.db
+      - OPENAI_API_KEY=your-api-key
 
   frontend:
     build:
