@@ -21,4 +21,4 @@ services:
     depends_on:
       - backend
     environment:
-      - BACKEND_URL=http://backend:8000
+      - AURORA_API_URL=http://backend:8000
