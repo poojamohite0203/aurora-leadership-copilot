@@ -95,5 +95,7 @@ else:
     with st.expander("🎭 Themes"):
         st.write(details.get("theme", "N/A"))
 
+# Ensure journals is defined before this
+sorted_journals = sorted(journals, key=lambda x: x.get('created_at', ''), reverse=True)
 for journal in sorted_journals:
     text = journal.get('text', getattr(journal, 'text', ''))

@@ -8,6 +8,13 @@ The **core extraction pipeline**: taking raw meeting text (transcripts or notes)
 - ✅ **Blockers**  
 ---
 
+## Deployed Services
+
+# The frontend will be available at its own Render URL, such as https://aurora-leadership-copilot.onrender.com
+
+# The backend will be available at its own Render URL https://aurora-leadership-copilot-backend.onrender.com/docs
+
+
 ## ⚙️ Setup Instructions
 ```bash
 ### 1. Clone Repository
@@ -49,9 +56,7 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
         uvicorn main:app --reload --app-dir src
     ## Swagger available at http://127.0.0.1:8000/docs
 
---- 
-```   
-
+---   
 ## Run the Stream Lit UI
     #Activate your virtual environment (if not already):
         python3 -m venv .venv
@@ -61,7 +66,7 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
     # Will render on http://localhost:8501
         streamlit run streamlit_app/app.py
 
-## 🚀 Run FastAPI Backend with Docker
+##  Run FastAPI Backend with Docker
 
 1. Build the backend image:
    ```bash
@@ -74,7 +79,7 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
    - Access FastAPI at: http://localhost:8000
    - Swagger docs: http://localhost:8000/docs
 
-## 🚀 Run Streamlit Frontend with Docker
+## Run Streamlit Frontend with Docker
 
 1. Build the frontend image:
    ```bash
@@ -86,7 +91,7 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
    ```
    - Access Streamlit UI at: http://localhost:8501
 
-## 🐳 Run Both with Docker Compose (Recommended for Local)
+## Run Both with Docker Compose (Recommended for Local)
 
 1. Start both services:
    ```bash
@@ -134,83 +139,54 @@ python3 -m pytest --capture=no --disable-warnings # to disable warnings
         Example: “What decisions were made about the API?” → AI answers using context. 
 
 
-## Conceptual flow
+## 🧩 Conceptual Flow
 
-        1️⃣ Data Ingestion (/extract)
+### 1️⃣ Data Ingestion (`/extract`)
+- **Endpoints:** `/meeting/extract`, `/clip/extract`, `/journal/extract`
+- **Purpose:** Feed raw text (meeting transcripts, chat clips, journal entries) into the system.
+- **Process:**
+  - LLM extracts summary, action items, decisions, blockers.
+  - Saves structured data in SQLite tables.
+  - Adds text to Chroma vector DB for later retrieval.
 
-        Endpoints: /meeting/extract, /clip/extract, /journal/extract
+---
 
-        Purpose: Feed raw text (meeting transcripts, chat clips, journal entries) into the system.
+### 2️⃣ Similarity Lookup (`/search`)
+- **Purpose:** Find content similar to a user query.
+- **Process:**
+  - Query converted to embedding.
+  - Compared against Chroma vectors.
+  - Returns matching raw items with metadata (meeting, journal, clip).
+- **Use Case:**  
+  _“Show me all clips about API issues.”_  
+  Useful for raw reference without LLM summarization.
 
-        What happens:
+---
 
-        LLM extracts summary, action items, decisions, blockers.
+### 3️⃣ RAG Answer (`/ask`)
+- **Purpose:** Generate an AI answer using multiple sources.
+- **Process:**
+  - Internally calls `/search` to get relevant vectors.
+  - Sends them to Ollama LLM with a prompt (e.g., “Summarize action items for API issues.”).
+  - LLM produces a coherent, human-readable answer.
+- **Use Case:**  
+  _“What should I do this week based on my meetings and journals?”_  
+  Drives smart summaries, weekly status report, and meeting trackers.
 
-        Saves structured data in SQLite tables.
+---
 
-        Adds the text to Chroma vector DB for later retrieval.
+### 4️⃣ Streamlit UI Integration
+- **Sidebar Tabs:**
+  - **Clipboard:** Shows `/search` results for clips.
+  - **Meetings:** Shows meetings + action items (from DB).
+  - **Journal:** Shows journals + decisions/action items.
+  - **Status Report:** Calls `/ask` to generate weekly summaries.
+- **Key Idea:**
+  - `/extract` → Ingest & save
+  - `/search` → Quick reference / history
+  - `/ask` → AI-generated insights & summaries
 
-        This is the foundation — every text source you want searchable or usable in RAG goes through here.
-
-        2️⃣ Similarity Lookup (/search)
-
-        Purpose: Find content similar to a user query.
-
-        What happens:
-
-        Query converted to embedding.
-
-        Compare against Chroma vectors.
-
-        Return matching raw items with metadata (meeting, journal, clip).
-
-        Use case:
-
-        “Show me all clips about API issues.”
-
-        Useful for raw reference without LLM summarization.
-
-        3️⃣ RAG Answer (/ask)
-
-        Purpose: Generate an AI answer using multiple sources.
-
-        What happens:
-
-        Internally calls /search to get relevant vectors.
-
-        Sends them to Ollama LLM with a prompt like:
-        “Based on these documents, summarize the action items for API issues.”
-
-        LLM produces coherent, human-readable answer.
-
-        Use case:
-
-        “What should I do this week based on my meetings and journals?”
-
-        This drives the smart summaries, weekly status report, and meeting trackers.
-
-        4️⃣ Streamlit UI Integration
-
-        Sidebar Tabs:
-
-        Clipboard → shows /search results for clips.
-
-        Meetings → shows meetings + action items (from DB).
-
-        Journal → shows journals + decisions/action items.
-
-        Status Report → calls /ask to generate weekly summaries.
-
-        Key Idea:
-
-        /extract → ingest & save.
-
-        /search → quick reference / history.
-
-        /ask → AI-generated insights & summaries.
-
-[📄 View the Flow in PFD ](./docs/system_flow_diagram.pdf)
-<img src="docs/system_flow_diagram.png" alt="Alt text for accessibility" width="400"/>
+---
 
 ### UI Flow
 
@@ -239,6 +215,9 @@ Sidebar
 
 
 
+
+[📄 View the Flow in PFD ](./docs/system_flow_diagram.pdf)
+<img src="docs/system_flow_diagram.png" alt="Alt text for accessibility" width="400"/>
 
 
 
