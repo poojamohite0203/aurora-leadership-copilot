@@ -1,8 +1,17 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import streamlit as st
-from streamlit_app.utils.backend_client import get_meetings, get_meeting_details, extract_meeting
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+# Initialize database BEFORE any imports that might query it
+from streamlit_app.utils.db_init import ensure_db_initialized
+if "db_initialized" not in st.session_state:
+    ensure_db_initialized()
+    st.session_state["db_initialized"] = True
+
+import streamlit as st
+from streamlit_app.utils.api_client import get_meetings, get_meeting_details, extract_meeting
 from sidebar import render_sidebar
 
 st.set_page_config(page_title="Meetings", layout="wide")
@@ -110,3 +119,6 @@ else:
                 st.write(f"- {description}")
         else:
             st.write("No blockers.")
+
+for meeting in meetings:
+    title = meeting.get('title', getattr(meeting, 'title', ''))

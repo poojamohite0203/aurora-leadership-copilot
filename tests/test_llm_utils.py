@@ -12,7 +12,7 @@ def test_extract_meeting_insights_basic():
 
     result = extract_insights_from_text(transcript, prompt_templates.MEETING_EXTRACTION_PROMPT)
 
-    print("LLM Response:", result)  # Debug print to see the actual response
+    # print("LLM Response:", result)  # Debug print to see the actual response
 
     # Case 1: If LLM responds in proper JSON
     if isinstance(result, dict) and "title" in result:
@@ -55,7 +55,7 @@ def test_extract_clip_insights_basic():
         "Discussed new feature. Alice will create a prototype. Bob raised a deployment issue."
     )
     result = extract_insights_from_text(text, prompt_templates.CLIP_EXTRACTION_PROMPT)
-    print("LLM Response (Clip):", result)
+    # print("LLM Response (Clip):", result)
     if isinstance(result, dict) and "summary" in result:
         assert "summary" in result
         assert "action_items" in result
@@ -74,7 +74,7 @@ def test_extract_journal_insights_basic():
         "Today I learned about API security. My strength was persistence. I need to improve my documentation."
     )
     result = extract_insights_from_text(text, prompt_templates.JOURNAL_EXTRACTION_PROMPT)
-    print("LLM Response (Journal):", result)
+    # print("LLM Response (Journal):", result)
     if isinstance(result, dict) and "summary" in result:
         assert "summary" in result
         assert "theme" in result

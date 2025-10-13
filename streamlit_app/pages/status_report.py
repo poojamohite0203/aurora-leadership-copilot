@@ -1,8 +1,17 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import streamlit as st
-from streamlit_app.utils.backend_client import get_weekly_reports, generate_weekly_report
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+# Initialize database BEFORE any other imports
+from streamlit_app.utils.db_init import ensure_db_initialized
+if "db_initialized" not in st.session_state:
+    ensure_db_initialized()
+    st.session_state["db_initialized"] = True
+
+import streamlit as st
+from streamlit_app.utils.api_client import get_weekly_reports, generate_weekly_report
 from sidebar import render_sidebar
 import datetime
 

@@ -3,10 +3,13 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# --- Use Streamlit secrets for OpenAI API key ---
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
-from streamlit_app.utils.backend_client import get_meetings, get_clips, get_journals, get_action_items
+# Initialize database tables (import all models and create tables)
+from src.db.init_db import init_database
+init_database()
+
+from streamlit_app.utils.api_client import get_meetings, get_clips, get_journals, get_action_items
 from streamlit_app.sidebar import render_sidebar
 
 st.set_page_config(page_title="AI Productivity Dashboard", layout="wide")
@@ -53,13 +56,13 @@ with col2:
 with col3:
     st.metric("Latest Clips", len(clips))
     if clips:
-        st.write(f"📝 {clips[-1].summary[:50]}...")
+        st.write(f"📝 {clips[-1].get('summary', '')[:50]}...")
     st.page_link("pages/clips.py", label="View Clips")
 
 with col4:
     if journals:
         st.metric("Latest Journal", len(journals))
-        st.write(f"📔 {journals[-1].text[:50]}...")
+        st.write(f"📔 {journals[-1].get('text', getattr(journals[-1], 'text', ''))[:50]}...")
     else:
         st.metric("Latest Journal", 0)
     st.page_link("pages/journals.py", label="View Journals")

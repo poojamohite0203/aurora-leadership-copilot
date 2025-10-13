@@ -1,9 +1,20 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import streamlit as st
-from streamlit_app.utils.backend_client import get_journals, get_journal_details, extract_journal
-from sidebar import render_sidebar
+
+# Add project root to Python path FIRST
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+# Initialize database BEFORE any other imports
+from streamlit_app.utils.db_init import ensure_db_initialized
+if "db_initialized" not in st.session_state:
+    ensure_db_initialized()
+    st.session_state["db_initialized"] = True
+
+import streamlit as st
+from streamlit_app.utils.api_client import get_journals, get_journal_details, extract_journal
+from streamlit_app.sidebar import render_sidebar
+
 
 st.set_page_config(page_title="Journals", layout="wide")
 st.title("📔 Journals")
@@ -61,8 +72,11 @@ if not journals:
     st.info("No journals found yet.")
 else:
     # Sort journals by id descending (newest first)
-    sorted_journals = sorted(journals, key=lambda j: j.id, reverse=True)
-    selected = st.sidebar.selectbox("Select a journal", [f"{j.id} - {j.summary[:40]}" for j in sorted_journals])
+    sorted_journals = sorted(journals, key=lambda j: j.get('id', getattr(j, 'id', 0)), reverse=True)
+    selected = st.sidebar.selectbox(
+        "Select a journal",
+        [f"{j.get('id', getattr(j, 'id', ''))} - {j.get('summary', getattr(j, 'summary', ''))[:40]}" for j in sorted_journals]
+    )
     journal_id = int(selected.split(" - ")[0])
     details = get_journal_details(journal_id)
 
@@ -80,3 +94,6 @@ else:
 
     with st.expander("🎭 Themes"):
         st.write(details.get("theme", "N/A"))
+
+for journal in sorted_journals:
+    text = journal.get('text', getattr(journal, 'text', ''))

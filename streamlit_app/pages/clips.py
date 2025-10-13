@@ -1,9 +1,18 @@
 import sys
 import os
+import streamlit as st
+
+# Add project root to Python path FIRST
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+# Initialize database BEFORE any other imports
+from streamlit_app.utils.db_init import ensure_db_initialized
+if "db_initialized" not in st.session_state:
+    ensure_db_initialized()
+    st.session_state["db_initialized"] = True
+
 import streamlit as st
-from streamlit_app.utils.backend_client import get_clips, get_clip_details, extract_clip
+from streamlit_app.utils.api_client import get_clips, get_clip_details, extract_clip
 from streamlit_app.sidebar import render_sidebar
 
 st.set_page_config(page_title="Clips", layout="wide")
@@ -62,8 +71,11 @@ if not clips:
     st.info("No clips found yet.")
 else:
     # Sort clips by id descending (newest first)
-    sorted_clips = sorted(clips, key=lambda c: c.id, reverse=True)
-    selected = st.sidebar.selectbox("Select a clip", [f"{c.id} - {c.summary[:40]}" for c in sorted_clips])
+    sorted_clips = sorted(clips, key=lambda c: c.get('id', getattr(c, 'id', 0)), reverse=True)
+    selected = st.sidebar.selectbox(
+        "Select a clip",
+        [f"{c.get('id', getattr(c, 'id', '') )} - {c.get('summary', getattr(c, 'summary', ''))[:40]}" for c in sorted_clips]
+    )
     clip_id = int(selected.split(" - ")[0])
     details = get_clip_details(clip_id)
 
@@ -72,3 +84,5 @@ else:
     st.write(f"**Summary:** {details.get('summary', '')}")
     st.write("📝 Full Text")
     st.write(details.get("text", ""))
+    for clip in sorted_clips:
+        summary = clip.get('summary', getattr(clip, 'summary', ''))

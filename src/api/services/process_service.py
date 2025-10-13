@@ -21,7 +21,7 @@ def extract_and_create_meeting(transcript: str, db: Session):
     # Moderate Input
     ok, categories = check_moderation(transcript)
     if not ok:
-        print(f"User input blocked due to: {categories}")
+        # print(f"User input blocked due to: {categories}")
         raise ValueError(f"User input blocked due to: {categories}")
     
     extracted = extract_insights_from_text(
@@ -32,7 +32,7 @@ def extract_and_create_meeting(transcript: str, db: Session):
     try:
         summary = validate_llm_summary_output(extracted, ["summary"], context="meeting summary")
     except ValueError as e:
-        print(str(e))
+        # print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
     meeting = models.Meeting(
@@ -78,7 +78,7 @@ def extract_and_create_clip(text: str, db: Session):
     # Moderate Input
     ok, categories = check_moderation(text)
     if not ok:
-        print(f"User input blocked due to: {categories}")
+        # print(f"User input blocked due to: {categories}")
         raise ValueError(f"User input blocked due to: {categories}")
     
     extracted = extract_insights_from_text(
@@ -88,7 +88,7 @@ def extract_and_create_clip(text: str, db: Session):
     try:
         summary = validate_llm_summary_output(extracted, ["summary"], context="clip summary")
     except ValueError as e:
-        print(str(e))
+        # print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
     clip = models.Clip(
@@ -129,7 +129,7 @@ def extract_and_create_journal(text: str, db: Session):
     # Moderate Input
     ok, categories = check_moderation(text)
     if not ok:
-        print(f"User input blocked due to: {categories}")
+        # print(f"User input blocked due to: {categories}")
         raise ValueError(f"User input blocked due to: {categories}")
     
     extracted = extract_insights_from_text(
@@ -139,7 +139,7 @@ def extract_and_create_journal(text: str, db: Session):
     try:
         summary = validate_llm_summary_output(extracted, ["summary"], context="journal summary")
     except ValueError as e:
-        print(str(e))
+        # print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
     journal = models.Journal(
@@ -265,7 +265,7 @@ def generate_weekly_report(date, db: Session, force_regen=False):
         # print("DEBUG: After validation - content:", repr(validated_summary[:200]))
         summary_text = validated_summary
     except ValueError as e:
-        print(str(e))
+        # print(str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
     # print("DEBUG: Final summary_text before DB save:", repr(summary_text[:200]))

@@ -1,7 +1,8 @@
+import os
 import requests
 import json
-import requests
-BASE_URL = "http://localhost:8000"  # Change if deployed elsewhere
+
+BASE_URL = os.getenv("AURORA_API_URL", "http://localhost:8000")
 
 # -------------------- Meetings --------------------
 def get_meetings():

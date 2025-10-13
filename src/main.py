@@ -10,6 +10,12 @@ from api.routers import blocker
 from api.routers import weekly_report
 from db.database import engine
 from db import models
+from langsmith import traceable
+
+# Load environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv()
+import os
 
 app = FastAPI(title="Aurora AI Leadership Copilot", version="0.1")
 

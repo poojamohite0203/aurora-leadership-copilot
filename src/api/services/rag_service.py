@@ -25,7 +25,7 @@ def ask_question(question: str, k: int = 5):
     # Moderate Input
     ok, categories = check_moderation(question)
     if not ok:
-        print(f"User input blocked due to: {categories}")
+        # print(f"User input blocked due to: {categories}")
         raise ValueError(f"User input blocked due to: {categories}")
     
     # 1. Search vector DB
