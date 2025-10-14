@@ -14,3 +14,4 @@ numpy
 langsmith
 watchdog
 streamlit
+psycopg2-binary
