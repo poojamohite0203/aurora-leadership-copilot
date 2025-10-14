@@ -9,7 +9,11 @@ services:
     volumes:
       - ./data:/app/data
     environment:
-      - DB_PATH=/app/data/aurora.db
+      - POSTGRES_HOST=db.dzccpqzffwbwrzuupcfh.supabase.co
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgred-password
+      - POSTGRES_DB=leadership
       - OPENAI_API_KEY=your-api-key
 
   frontend:

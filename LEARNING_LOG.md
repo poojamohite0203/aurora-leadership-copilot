@@ -192,3 +192,6 @@ This will execute your evals (see `langsmith_evals.py`), print results, and publ
 
 ---
 
+## External Postgres SQL DB :https://supabase.com/dashboard/project/dzccpqzffwbwrzuupcfh
+
+## External Vector DB : 

@@ -2,28 +2,21 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 
-# Use environment variable for DB path, default to /app/data/aurora.db
-DB_PATH = os.environ.get("DB_PATH", "./data/aurora.db")  # Use relative path by default
+# Use environment variables for Postgres connection
+POSTGRES_HOST = os.environ.get("POSTGRES_HOST", "db.dzccpqzffwbwrzuupcfh.supabase.co")
+POSTGRES_PORT = os.environ.get("POSTGRES_PORT", "5432")
+POSTGRES_USER = os.environ.get("POSTGRES_USER", "postgres")
+POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "")
+POSTGRES_DB = os.environ.get("POSTGRES_DB", "postgres")
 
-# Ensure directory exists
-os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+SQLALCHEMY_DATABASE_URL = (
+    f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+)
 
-# Auto-create DB if missing
-if not os.path.exists(DB_PATH):
-    open(DB_PATH, 'a').close()
-    print(f"📄 Created new database at: {DB_PATH}")
-
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
-
-# SQLite configuration optimized for web deployment
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, 
-    connect_args={
-        "check_same_thread": False,
-        "timeout": 20  # Add timeout for better reliability
-    },
-    pool_pre_ping=True,  # Verify connections before use
-    echo=False  # Set to True for SQL debugging
+    SQLALCHEMY_DATABASE_URL,
+    pool_pre_ping=True,
+    echo=False
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

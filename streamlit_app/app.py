@@ -49,7 +49,7 @@ with col1:
 
 with col2:
     # Only count open and in_progress action items
-    active_actions = [a for a in actions if hasattr(a, 'status') and a.status in ["open", "in_progress"]]
+    active_actions = [a for a in actions if a.get('status', getattr(a, 'status', '')) in ["open", "in_progress"]]
     st.metric("Open Action Items", len(active_actions))
     st.page_link("pages/action_tracker.py", label="Action Tracker")
 
